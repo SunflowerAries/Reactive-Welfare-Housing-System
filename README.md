@@ -3,8 +3,8 @@
 写代码前，请先简单了解一下 
 
 - [Go 的包管理](https://zhuanlan.zhihu.com/p/60703832)，目前可以通过 go install 将 go.mod 中的依赖包安装
-- [Go 的 sql1](http://go-database-sql.org/overview.html)，[Go 的 sql2]([https://xuchao918.github.io/2019/06/13/Go%E6%93%8D%E4%BD%9CMySql%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%96%B9%E5%BC%8F/](https://xuchao918.github.io/2019/06/13/Go操作MySql数据库的方式/))
-- [Protobuf](https://juejin.im/post/5d81bb5cf265da03ae78ab7b)
+- [Go 的 sql1](http://go-database-sql.org/overview.html)，[Go 的 sql2](https://xuchao918.github.io/2019/06/13/Go%E6%93%8D%E4%BD%9CMySql%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%96%B9%E5%BC%8F/)
+- [Protobuf](https://juejin.im/post/5d81bb5cf265da03ae78ab7b) https://developers.google.com/protocol-buffers/docs/gotutorial
 - [博客文档](https://blog.oklahome.net/)
 
 ## 参与开发
