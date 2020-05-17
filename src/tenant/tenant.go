@@ -7,7 +7,6 @@ import (
 	"github.com/AsynkronIT/protoactor-go/remote"
 
 	tenantMessage "housingSystem/src/messages/tenant"
-	verifierMessage "housingSystem/src/messages/verifier"
 	"housingSystem/src/shared"
 )
 
@@ -39,7 +38,7 @@ func (t *Actor) Receive(ctx actor.Context) {
 		fmt.Println("Tenant Stopped, actor and its children are stopped")
 	case *TriggerNewApplicationRequest:
 		fmt.Println("Tenant Ready to request.")
-		newMsg := verifierMessage.HouseApplicationRequest{UserId: 100, UserName: "Chaokun",}
+		newMsg := tenantMessage.HouseApplicationRequest{UserId: 100, UserName: "Chaokun",}
 		ctx.Send(t.verifier, &newMsg)
 	case *tenantMessage.HouseApplicationResponse:
 		fmt.Println("The application submitted to ", ctx.Sender())

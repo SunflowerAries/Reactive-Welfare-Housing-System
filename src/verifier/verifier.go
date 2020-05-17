@@ -7,7 +7,6 @@ import (
 	"github.com/AsynkronIT/protoactor-go/remote"
 
 	tenantMessage "housingSystem/src/messages/tenant"
-	verifierMessage "housingSystem/src/messages/verifier"
 	"housingSystem/src/shared"
 )
 
@@ -29,7 +28,7 @@ func (t *Actor) Receive(ctx actor.Context) {
 		t.government = actor.NewPID("127.0.0.1:8082", "Government")
 	case *actor.Stopped:
 		fmt.Println("Verifier Stopped, actor and its children are stopped")
-	case *verifierMessage.HouseApplicationRequest:
+	case *tenantMessage.HouseApplicationRequest:
 		fmt.Println("Verifier Received a application from ", msg.UserName)
 		ctx.Send(ctx.Sender(), &tenantMessage.HouseApplicationResponse{})
 	}
