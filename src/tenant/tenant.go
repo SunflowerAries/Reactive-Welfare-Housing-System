@@ -1,14 +1,14 @@
 package tenant
 
 import (
-	// "runtime"
 	"fmt"
-	// console "github.com/AsynkronIT/goconsole"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
+
 	tenantMessage "housingSystem/src/messages/tenant"
+	verifierMessage "housingSystem/src/messages/verifier"
 	"housingSystem/src/shared"
-	// _ "housingSystem/src/verifier"
 )
 
 // Actor The Tenant Actor
@@ -34,18 +34,13 @@ func (t *Actor) Receive(ctx actor.Context) {
 		fmt.Println("Tenant Starting, initialize actor here, PID:", ctx.Self())
 		t.Self = ctx.Self()
 		t.verifier = actor.NewPID("127.0.0.1:8080", "Verifier")
-		// t.distributor = actor.NewPID("127.0.0.1:8081", "Distributor")
-		// shared.Use(verifierActor)
-
+		t.distributor = actor.NewPID("127.0.0.1:8081", "Distributor")
 	case *actor.Stopped:
 		fmt.Println("Tenant Stopped, actor and its children are stopped")
 	case *TriggerNewApplicationRequest:
 		fmt.Println("Tenant Ready to request.")
-		ctx.Send(t.verifier, &tenantMessage.HouseApplicationRequest{
-			UserId: 1,
-			UserName: "Chaokun",
-		})
-
+		newMsg := verifierMessage.HouseApplicationRequest{UserId: 100, UserName: "Chaokun",}
+		ctx.Send(t.verifier, &newMsg)
 	case *tenantMessage.HouseApplicationResponse:
 		fmt.Println("The application submitted to ", ctx.Sender())
 	}

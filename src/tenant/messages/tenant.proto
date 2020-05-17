@@ -1,26 +1,28 @@
 syntax = "proto3";
 package messages;
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+
 option go_package = "src/messages/tenant";
 
 message HouseApplicationRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId=1; // could be a ID Card Number
+    string UserName=2;
 }
 
 message HouseApplicationResponse {
 }
 
 message HouseReplacementRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId = 1; // could be a ID Card Number
+    string UserName = 2;
 }
 
 message HouseReplacementResponse {
 }
 
 message HouseReturnRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId = 1; // could be a ID Card Number
+    string UserName = 2;
 }
 
 message HouseReturnResponse {

@@ -1,5 +1,5 @@
 syntax = "proto3";
 package messages;
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 
-option go_package = "src/messages/tenant";
-
+option go_package = "src/messages/verifier";

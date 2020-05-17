@@ -19,16 +19,11 @@ func newParentActor() actor.Actor {
 func (state *parentActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
-		// timeout := 5 * time.Second
 		fmt.Println("VerifierParent Starting, initialize actor here, PID:", ctx.Self())
 		shared.Use(msg)
 		var rootContext = actor.EmptyRootContext
 		props := actor.PropsFromProducer(func() actor.Actor { return &verifier.Actor{} })
 		rootContext.SpawnNamed(props, "Verifier")
-		
-		// pidResp, _ := remote.SpawnNamed("127.0.0.1:9001", "Tenant-0", "Tenant", timeout)
-		// child := pidResp.Pid
-		// ctx.Send(child, msg)
 	}
 }
 
@@ -45,8 +40,5 @@ func main() {
 
 	pid := rootContext.Spawn(props)
 	shared.Use(pid)
-	// var rootContext = actor.EmptyRootContext
-	// props := actor.PropsFromProducer(func() actor.Actor { return &Actor{} })
-	// rootContext.SpawnNamed(props, "Verifier")
 	console.ReadLine()
 }
