@@ -1,0 +1,3 @@
+syntax = "proto3";
+package messages;
+option go_package = "src/messages/shared";
