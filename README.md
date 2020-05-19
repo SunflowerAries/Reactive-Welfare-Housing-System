@@ -33,7 +33,8 @@ use housing
 CREATE TABLE house (
 	id INT AUTO_INCREMENT PRIMARY KEY, 
     age INT NOT NULL,
-    area INT NOT NULL
+    area INT NOT NULL,
+    level INT NOT NULL
 );
 
 CREATE TABLE family (
@@ -47,16 +48,6 @@ CREATE TABLE reside (
     FOREIGN KEY (house_id) REFERENCES house(id),
     FOREIGN KEY (family_id) REFERENCES family(id),
     PRIMARY KEY (house_id, family_id)
-);
-
-CREATE TABLE user (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
-    family_id INT NOT NULL,
-    FOREIGN KEY (family_id) REFERENCES family(id),
-    incomes INT NOT NULL,
-    INDEX(name),
-    INDEX(family_id)
 );
 ```
 
