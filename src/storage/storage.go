@@ -13,14 +13,14 @@ import (
 
 type House struct {
 	ID    uint
-	Level int
-	Age   int
-	Area  int
+	Level int32
+	Age   int32
+	Area  int32
 }
 
 type Family struct {
 	ID     uint
-	Income int
+	Income int32
 }
 
 type Reside struct {
@@ -119,14 +119,14 @@ func InitDB() (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	Houses := []House{
-		{Age: 1, Area: 100, Level: 3},
-		{Age: 2, Area: 80, Level: 2},
-		{Age: 3, Area: 60, Level: 1},
-	}
-	fmt.Printf("%+v\n", Houses)
-	myDB := &DB{db}
-	myDB.BatchInsertHouse(Houses)
+	// Houses := []House{
+	// 	{Age: 1, Area: 100, Level: 3},
+	// 	{Age: 2, Area: 80, Level: 2},
+	// 	{Age: 3, Area: 60, Level: 1},
+	// }
+	// fmt.Printf("%+v\n", Houses)
+	// myDB := &DB{db}
+	// myDB.BatchInsertHouse(Houses)
 	// Familys := []Family{
 	// 	{Income: 1000},
 	// 	{Income: 800},

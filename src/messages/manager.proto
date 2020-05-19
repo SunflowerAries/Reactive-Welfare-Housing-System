@@ -1,0 +1,13 @@
+syntax = "proto3";
+package messages;
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+
+message Houses {
+    repeated House Houses = 1;
+}
+
+message House {
+    int32 Level = 1;
+    int32 Age = 2;
+    int32 Area = 3;
+}
