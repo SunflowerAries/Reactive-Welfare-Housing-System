@@ -1,34 +1,40 @@
 package manager
 
 import (
+	"Reactive-Welfare-Housing-System/src/messages/distributorMessages"
+	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
+	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
+	"Reactive-Welfare-Housing-System/src/storage"
 	"fmt"
-	"housingSystem/src/messages"
-	"housingSystem/src/storage"
 	"reflect"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type supplyHouses struct {
-	houses []storage.House
+type managerActor struct {
+	db             storage.HouseSystem
+	distributorPID *actor.PID
 }
 
-type manager struct {
-	db storage.HouseSystem
-}
-
-func (m *manager) Receive(ctx actor.Context) {
-
+func (m *managerActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
-	case *messages.Houses:
-		fmt.Println("In supplyhouses")
-		fmt.Printf("%+v\n", msg.Houses)
+	case *sharedMessages.Houses:
 		houses := make([]storage.House, 0, len(msg.Houses))
 		for _, house := range msg.Houses {
 			houses = append(houses, storage.House{Level: house.Level, Age: house.Age, Area: house.Area})
 		}
 		fmt.Println(houses, reflect.TypeOf(houses))
 		m.db.BatchInsertHouse(houses)
+	case *distributorMessages.HouseMatch:
+		err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
+		if err != nil {
+			fmt.Printf("Insert house failed, err:%v", err)
+			return
+		}
+		ctx.Respond(&managerMessages.HouseMatchApprove{Match: msg})
+	case *sharedMessages.DistributorConnect:
+		m.distributorPID = msg.Sender
+		fmt.Println("In manager", msg.Sender)
 	default:
 		fmt.Println(reflect.TypeOf(msg), msg)
 	}
@@ -36,7 +42,7 @@ func (m *manager) Receive(ctx actor.Context) {
 
 func NewManagerActor(db storage.HouseSystem) actor.Producer {
 	return func() actor.Actor {
-		return &manager{
+		return &managerActor{
 			db: db,
 		}
 	}

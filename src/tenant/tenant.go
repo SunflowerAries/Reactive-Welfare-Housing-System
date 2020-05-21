@@ -4,17 +4,18 @@ import (
 	// "runtime"
 	"fmt"
 	// console "github.com/AsynkronIT/goconsole"
+	tenantMessage "Reactive-Welfare-Housing-System/src/messages/tenant"
+	"Reactive-Welfare-Housing-System/src/shared"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
-	tenantMessage "housingSystem/src/messages/tenant"
-	"housingSystem/src/shared"
-	// _ "housingSystem/src/verifier"
+	// _ "Reactive-Welfare-Housing-System/src/verifier"
 )
 
 // Actor The Tenant Actor
 type Actor struct {
 	shared.BaseActor
-	verifier *actor.PID
+	verifier    *actor.PID
 	distributor *actor.PID
 }
 
@@ -42,7 +43,7 @@ func (t *Actor) Receive(ctx actor.Context) {
 	case *TriggerNewApplicationRequest:
 		fmt.Println("Tenant Ready to request.")
 		ctx.Send(t.verifier, &tenantMessage.HouseApplicationRequest{
-			UserId: 1,
+			UserId:   1,
 			UserName: "Chaokun",
 		})
 

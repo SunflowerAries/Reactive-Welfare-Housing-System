@@ -1,4 +1,4 @@
-module housingSystem
+module Reactive-Welfare-Housing-System
 
 go 1.14
 

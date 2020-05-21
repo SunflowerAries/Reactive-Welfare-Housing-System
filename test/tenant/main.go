@@ -8,8 +8,8 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
 
-	"housingSystem/src/tenant"
-	// "housingSystem/src/shared"
+	"Reactive-Welfare-Housing-System/src/tenant"
+	// "Reactive-Welfare-Housing-System/src/shared"
 )
 
 type parentActor struct{}

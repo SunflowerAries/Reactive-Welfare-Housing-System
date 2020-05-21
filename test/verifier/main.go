@@ -6,8 +6,8 @@ import (
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
 
-	"housingSystem/src/verifier"
-	"housingSystem/src/shared"
+	"Reactive-Welfare-Housing-System/src/shared"
+	"Reactive-Welfare-Housing-System/src/verifier"
 )
 
 type parentActor struct{}
@@ -25,7 +25,7 @@ func (state *parentActor) Receive(ctx actor.Context) {
 		var rootContext = actor.EmptyRootContext
 		props := actor.PropsFromProducer(func() actor.Actor { return &verifier.Actor{} })
 		rootContext.SpawnNamed(props, "Verifier")
-		
+
 		// pidResp, _ := remote.SpawnNamed("127.0.0.1:9001", "Tenant-0", "Tenant", timeout)
 		// child := pidResp.Pid
 		// ctx.Send(child, msg)

@@ -1,10 +1,11 @@
 package verifier
 
 import (
+	tenantMessage "Reactive-Welfare-Housing-System/src/messages/tenant"
 	"fmt"
-	tenantMessage "housingSystem/src/messages/tenant"
-	// verifierMessage "housingSystem/src/messages/verifier"
-	"housingSystem/src/shared"
+
+	// verifierMessage "Reactive-Welfare-Housing-System/src/messages/verifier"
+	"Reactive-Welfare-Housing-System/src/shared"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"

@@ -1,4 +1,28 @@
 syntax = "proto3";
-package messages;
+package shared;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/sharedMessages";
 
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+
+message Houses {
+    repeated House Houses = 1;
+}
+
+message House {
+    int32 Level = 1;
+    int32 Age = 2;
+    int32 Area = 3;
+}
+
+message ManagerConnect {
+    actor.PID Sender = 1;
+}
+
+message DistributorConnect {
+    actor.PID Sender = 1;
+}
+
+message Verifier {
+
+}

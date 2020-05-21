@@ -1,13 +1,11 @@
 syntax = "proto3";
-package messages;
+package manager;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/managerMessages";
+
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "Reactive-Welfare-Housing-System/src/messages/distributor.proto";
 
-message Houses {
-    repeated House Houses = 1;
-}
-
-message House {
-    int32 Level = 1;
-    int32 Age = 2;
-    int32 Area = 3;
+message HouseMatchApprove {
+    distributor.HouseMatch Match = 1;
 }

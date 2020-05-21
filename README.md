@@ -32,22 +32,23 @@ create database housing
 use housing
 CREATE TABLE house (
 	id INT AUTO_INCREMENT PRIMARY KEY, 
-    age INT NOT NULL,
-    area INT NOT NULL,
-    level INT NOT NULL
+	age INT NOT NULL,
+	area INT NOT NULL,
+	level INT NOT NULL
 );
 
 CREATE TABLE family (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-    income INT NOT NULL
+	members INT NOT NULL,
+	income INT NOT NULL
 );
 
 CREATE TABLE reside (
 	house_id INT NOT NULL,
-    family_id INT NOT NULL,
-    FOREIGN KEY (house_id) REFERENCES house(id),
-    FOREIGN KEY (family_id) REFERENCES family(id),
-    PRIMARY KEY (house_id, family_id)
+	family_id INT NOT NULL,
+	FOREIGN KEY (house_id) REFERENCES house(id),
+	FOREIGN KEY (family_id) REFERENCES family(id),
+	PRIMARY KEY (house_id, family_id)
 );
 ```
 

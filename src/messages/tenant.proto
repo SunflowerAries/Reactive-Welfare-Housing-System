@@ -1,26 +1,30 @@
 syntax = "proto3";
-package messages;
+package tenant;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/tenantMessages";
+
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 
 message HouseApplicationRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId = 1; // could be a ID Card Number
+    string UserName = 2;
 }
 
 message HouseApplicationResponse {
+
 }
 
 message HouseReplacementRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId = 1; // could be a ID Card Number
+    string UserName = 2;
 }
 
 message HouseReplacementResponse {
 }
 
 message HouseReturnRequest {
-    int32 userId = 1; // could be a ID Card Number
-    string userName = 2;
+    int32 UserId = 1; // could be a ID Card Number
+    string UserName = 2;
 }
 
 message HouseReturnResponse {

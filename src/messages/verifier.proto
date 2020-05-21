@@ -1,4 +1,17 @@
 syntax = "proto3";
-package messages;
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+package verifier;
 
+option go_package = "Reactive-Welfare-Housing-System/src/messages/verifierMessages";
+
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "Reactive-Welfare-Housing-System/src/messages/tenant.proto";
+
+message HouseApplicationRequest {
+    tenant.HouseApplicationRequest UserInfo = 1;
+    int32 FamilyID = 2;
+    int32 Level = 3;
+}
+
+message HouseApplicationResponse {
+
+}

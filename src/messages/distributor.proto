@@ -1,3 +1,17 @@
 syntax = "proto3";
-package messages;
+package distributor;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/distributorMessages";
+
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+
+message HouseApplicationReject {
+    string Reason = 1;
+}
+
+message HouseMatch {
+    int32 FamilyID = 1;
+    int32 HouseID = 2;
+    int32 Level = 3;
+    int32 Index = 4;
+}
