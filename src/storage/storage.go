@@ -51,6 +51,10 @@ type HouseSystem interface {
 	BatchInsertHouse(records []House)
 }
 
+type FamilySystem interface {
+	BatchInsertFamily(db *sql.DB, records []Family)
+}
+
 type DB struct {
 	*sql.DB
 }
@@ -127,15 +131,15 @@ func InitDB() (*DB, error) {
 	fmt.Printf("%+v\n", Houses)
 	myDB := &DB{db}
 	myDB.BatchInsertHouse(Houses)
-	// Familys := []Family{
-	// 	{Income: 1000},
-	// 	{Income: 800},
-	// }
-	// BatchInsertFamily(db, Familys)
-	// Resides := []Reside{
-	// 	{HouseID: 1, FamilyID: 2},
-	// 	{HouseID: 2, FamilyID: 1},
-	// }
-	// BatchInsertReside(db, Resides)
+	Familys := []Family{
+ 		{Income: 1000},
+ 		{Income: 800},
+	}
+	BatchInsertFamily(db, Familys)
+	Resides := []Reside{
+		{HouseID: 1, FamilyID: 2},
+		{HouseID: 2, FamilyID: 1},
+	}
+	BatchInsertReside(db, Resides)
 	return &DB{db}, nil
 }

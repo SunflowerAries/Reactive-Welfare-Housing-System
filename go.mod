@@ -12,5 +12,6 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/jinzhu/gorm v1.9.12
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
+	google.golang.org/grpc v1.28.1 // indirect
 	google.golang.org/protobuf v1.23.0
 )

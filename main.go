@@ -22,11 +22,11 @@ func main() {
 		log.Panic(err)
 	}
 	env := &Env{db}
-
 	rootContext := actor.EmptyRootContext
 	distributorPID := rootContext.Spawn(actor.PropsFromProducer(distributor.NewDistributorActor(env.db)).WithMailbox(mailbox.Unbounded()))
 	// managerPID := rootContext.Spawn(actor.PropsFromProducer(manager.NewManagerActor(env.db)).WithMailbox(mailbox.Unbounded()))
 	fmt.Println(distributorPID)
+	fmt.Println("Hello world")
 	http.HandleFunc("/houses", env.housesIndex)
 	http.ListenAndServe(":3000", nil)
 }
