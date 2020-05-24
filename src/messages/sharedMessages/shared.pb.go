@@ -26,16 +26,16 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type Houses struct {
+type NewHouses struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Houses []*House `protobuf:"bytes,1,rep,name=Houses,proto3" json:"Houses,omitempty"`
+	Houses []*NewHouse `protobuf:"bytes,1,rep,name=Houses,proto3" json:"Houses,omitempty"`
 }
 
-func (x *Houses) Reset() {
-	*x = Houses{}
+func (x *NewHouses) Reset() {
+	*x = NewHouses{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -43,13 +43,13 @@ func (x *Houses) Reset() {
 	}
 }
 
-func (x *Houses) String() string {
+func (x *NewHouses) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Houses) ProtoMessage() {}
+func (*NewHouses) ProtoMessage() {}
 
-func (x *Houses) ProtoReflect() protoreflect.Message {
+func (x *NewHouses) ProtoReflect() protoreflect.Message {
 	mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -61,30 +61,31 @@ func (x *Houses) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Houses.ProtoReflect.Descriptor instead.
-func (*Houses) Descriptor() ([]byte, []int) {
+// Deprecated: Use NewHouses.ProtoReflect.Descriptor instead.
+func (*NewHouses) Descriptor() ([]byte, []int) {
 	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Houses) GetHouses() []*House {
+func (x *NewHouses) GetHouses() []*NewHouse {
 	if x != nil {
 		return x.Houses
 	}
 	return nil
 }
 
-type House struct {
+type NewHouse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Level int32 `protobuf:"varint,1,opt,name=Level,proto3" json:"Level,omitempty"`
-	Age   int32 `protobuf:"varint,2,opt,name=Age,proto3" json:"Age,omitempty"`
-	Area  int32 `protobuf:"varint,3,opt,name=Area,proto3" json:"Area,omitempty"`
+	ID    int32 `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	Level int32 `protobuf:"varint,2,opt,name=Level,proto3" json:"Level,omitempty"`
+	Age   int32 `protobuf:"varint,3,opt,name=Age,proto3" json:"Age,omitempty"`
+	Area  int32 `protobuf:"varint,4,opt,name=Area,proto3" json:"Area,omitempty"`
 }
 
-func (x *House) Reset() {
-	*x = House{}
+func (x *NewHouse) Reset() {
+	*x = NewHouse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -92,13 +93,13 @@ func (x *House) Reset() {
 	}
 }
 
-func (x *House) String() string {
+func (x *NewHouse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*House) ProtoMessage() {}
+func (*NewHouse) ProtoMessage() {}
 
-func (x *House) ProtoReflect() protoreflect.Message {
+func (x *NewHouse) ProtoReflect() protoreflect.Message {
 	mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -110,26 +111,33 @@ func (x *House) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use House.ProtoReflect.Descriptor instead.
-func (*House) Descriptor() ([]byte, []int) {
+// Deprecated: Use NewHouse.ProtoReflect.Descriptor instead.
+func (*NewHouse) Descriptor() ([]byte, []int) {
 	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *House) GetLevel() int32 {
+func (x *NewHouse) GetID() int32 {
+	if x != nil {
+		return x.ID
+	}
+	return 0
+}
+
+func (x *NewHouse) GetLevel() int32 {
 	if x != nil {
 		return x.Level
 	}
 	return 0
 }
 
-func (x *House) GetAge() int32 {
+func (x *NewHouse) GetAge() int32 {
 	if x != nil {
 		return x.Age
 	}
 	return 0
 }
 
-func (x *House) GetArea() int32 {
+func (x *NewHouse) GetArea() int32 {
 	if x != nil {
 		return x.Area
 	}
@@ -230,6 +238,53 @@ func (x *DistributorConnect) GetSender() *actor.PID {
 	return nil
 }
 
+type ExaminationList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	HouseID []int32 `protobuf:"varint,1,rep,packed,name=HouseID,proto3" json:"HouseID,omitempty"`
+}
+
+func (x *ExaminationList) Reset() {
+	*x = ExaminationList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ExaminationList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExaminationList) ProtoMessage() {}
+
+func (x *ExaminationList) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExaminationList.ProtoReflect.Descriptor instead.
+func (*ExaminationList) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ExaminationList) GetHouseID() []int32 {
+	if x != nil {
+		return x.HouseID
+	}
+	return nil
+}
+
 type Verifier struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -239,7 +294,7 @@ type Verifier struct {
 func (x *Verifier) Reset() {
 	*x = Verifier{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[4]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -252,7 +307,7 @@ func (x *Verifier) String() string {
 func (*Verifier) ProtoMessage() {}
 
 func (x *Verifier) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[4]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -265,7 +320,7 @@ func (x *Verifier) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Verifier.ProtoReflect.Descriptor instead.
 func (*Verifier) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(), []int{4}
+	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(), []int{5}
 }
 
 var File_Reactive_Welfare_Housing_System_src_messages_shared_proto protoreflect.FileDescriptor
@@ -278,27 +333,31 @@ var file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDesc = []b
 	0x72, 0x65, 0x64, 0x1a, 0x36, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
 	0x41, 0x73, 0x79, 0x6e, 0x6b, 0x72, 0x6f, 0x6e, 0x49, 0x54, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x61, 0x63, 0x74, 0x6f, 0x72, 0x2d, 0x67, 0x6f, 0x2f, 0x61, 0x63, 0x74, 0x6f, 0x72, 0x2f, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2f, 0x0a, 0x06, 0x48,
-	0x6f, 0x75, 0x73, 0x65, 0x73, 0x12, 0x25, 0x0a, 0x06, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x18,
-	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x48,
-	0x6f, 0x75, 0x73, 0x65, 0x52, 0x06, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x22, 0x43, 0x0a, 0x05,
-	0x48, 0x6f, 0x75, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x41,
-	0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x41, 0x67, 0x65, 0x12, 0x12, 0x0a,
-	0x04, 0x41, 0x72, 0x65, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x41, 0x72, 0x65,
-	0x61, 0x22, 0x34, 0x0a, 0x0e, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x6e,
-	0x65, 0x63, 0x74, 0x12, 0x22, 0x0a, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61, 0x63, 0x74, 0x6f, 0x72, 0x2e, 0x50, 0x49, 0x44, 0x52,
-	0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x22, 0x38, 0x0a, 0x12, 0x44, 0x69, 0x73, 0x74, 0x72,
-	0x69, 0x62, 0x75, 0x74, 0x6f, 0x72, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x22, 0x0a,
-	0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e,
-	0x61, 0x63, 0x74, 0x6f, 0x72, 0x2e, 0x50, 0x49, 0x44, 0x52, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x22, 0x0a, 0x0a, 0x08, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x42, 0x3d, 0x5a,
-	0x3b, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d, 0x57, 0x65, 0x6c, 0x66, 0x61, 0x72,
-	0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d,
-	0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x73, 0x68,
-	0x61, 0x72, 0x65, 0x64, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x35, 0x0a, 0x09, 0x4e,
+	0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x12, 0x28, 0x0a, 0x06, 0x48, 0x6f, 0x75, 0x73,
+	0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65,
+	0x64, 0x2e, 0x4e, 0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x52, 0x06, 0x48, 0x6f, 0x75, 0x73,
+	0x65, 0x73, 0x22, 0x56, 0x0a, 0x08, 0x4e, 0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x12, 0x0e,
+	0x0a, 0x02, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x49, 0x44, 0x12, 0x14,
+	0x0a, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c,
+	0x65, 0x76, 0x65, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x41, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x03, 0x41, 0x67, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x41, 0x72, 0x65, 0x61, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x41, 0x72, 0x65, 0x61, 0x22, 0x34, 0x0a, 0x0e, 0x4d, 0x61,
+	0x6e, 0x61, 0x67, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x22, 0x0a, 0x06,
+	0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61,
+	0x63, 0x74, 0x6f, 0x72, 0x2e, 0x50, 0x49, 0x44, 0x52, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72,
+	0x22, 0x38, 0x0a, 0x12, 0x44, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x6f, 0x72, 0x43,
+	0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x22, 0x0a, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61, 0x63, 0x74, 0x6f, 0x72, 0x2e, 0x50,
+	0x49, 0x44, 0x52, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x22, 0x2b, 0x0a, 0x0f, 0x45, 0x78,
+	0x61, 0x6d, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x18, 0x0a,
+	0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x18, 0x01, 0x20, 0x03, 0x28, 0x05, 0x52, 0x07,
+	0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x22, 0x0a, 0x0a, 0x08, 0x56, 0x65, 0x72, 0x69, 0x66,
+	0x69, 0x65, 0x72, 0x42, 0x3d, 0x5a, 0x3b, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d,
+	0x57, 0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d,
+	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x2f, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -313,19 +372,20 @@ func file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescGZIP(
 	return file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDescData
 }
 
-var file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_Reactive_Welfare_Housing_System_src_messages_shared_proto_goTypes = []interface{}{
-	(*Houses)(nil),             // 0: shared.Houses
-	(*House)(nil),              // 1: shared.House
+	(*NewHouses)(nil),          // 0: shared.NewHouses
+	(*NewHouse)(nil),           // 1: shared.NewHouse
 	(*ManagerConnect)(nil),     // 2: shared.ManagerConnect
 	(*DistributorConnect)(nil), // 3: shared.DistributorConnect
-	(*Verifier)(nil),           // 4: shared.Verifier
-	(*actor.PID)(nil),          // 5: actor.PID
+	(*ExaminationList)(nil),    // 4: shared.ExaminationList
+	(*Verifier)(nil),           // 5: shared.Verifier
+	(*actor.PID)(nil),          // 6: actor.PID
 }
 var file_Reactive_Welfare_Housing_System_src_messages_shared_proto_depIdxs = []int32{
-	1, // 0: shared.Houses.Houses:type_name -> shared.House
-	5, // 1: shared.ManagerConnect.Sender:type_name -> actor.PID
-	5, // 2: shared.DistributorConnect.Sender:type_name -> actor.PID
+	1, // 0: shared.NewHouses.Houses:type_name -> shared.NewHouse
+	6, // 1: shared.ManagerConnect.Sender:type_name -> actor.PID
+	6, // 2: shared.DistributorConnect.Sender:type_name -> actor.PID
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -340,7 +400,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_shared_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Houses); i {
+			switch v := v.(*NewHouses); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -352,7 +412,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_shared_proto_init() {
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*House); i {
+			switch v := v.(*NewHouse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -388,6 +448,18 @@ func file_Reactive_Welfare_Housing_System_src_messages_shared_proto_init() {
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ExaminationList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_Reactive_Welfare_Housing_System_src_messages_shared_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Verifier); i {
 			case 0:
 				return &v.state
@@ -406,7 +478,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_shared_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Reactive_Welfare_Housing_System_src_messages_shared_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

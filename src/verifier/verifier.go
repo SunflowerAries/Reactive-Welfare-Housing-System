@@ -1,7 +1,6 @@
 package verifier
 
 import (
-	tenantMessage "Reactive-Welfare-Housing-System/src/messages/tenant"
 	"fmt"
 
 	// verifierMessage "Reactive-Welfare-Housing-System/src/messages/verifier"

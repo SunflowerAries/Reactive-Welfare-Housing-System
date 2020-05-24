@@ -5,7 +5,25 @@ option go_package = "Reactive-Welfare-Housing-System/src/messages/managerMessage
 
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/distributor.proto";
+import "Reactive-Welfare-Housing-System/src/messages/shared.proto";
+import "Reactive-Welfare-Housing-System/src/messages/property.proto";
 
 message HouseMatchApprove {
     distributor.HouseMatch Match = 1;
+}
+
+message HouseMatchReject {
+    distributor.HouseMatch Match = 1;
+}
+
+message NewHouses {
+    shared.NewHouses Houses = 1;
+}
+
+message UnqualifiedHouses {
+    repeated property.ExaminationReject Houses = 1;
+}
+
+message ExaminationList {
+    repeated int32 HouseID = 1;
 }

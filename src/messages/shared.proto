@@ -5,14 +5,15 @@ option go_package = "Reactive-Welfare-Housing-System/src/messages/sharedMessages
 
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 
-message Houses {
-    repeated House Houses = 1;
+message NewHouses {
+    repeated NewHouse Houses = 1;
 }
 
-message House {
-    int32 Level = 1;
-    int32 Age = 2;
-    int32 Area = 3;
+message NewHouse {
+    int32 ID = 1;
+    int32 Level = 2;
+    int32 Age = 3;
+    int32 Area = 4;
 }
 
 message ManagerConnect {
@@ -21,6 +22,10 @@ message ManagerConnect {
 
 message DistributorConnect {
     actor.PID Sender = 1;
+}
+
+message ExaminationList {
+    repeated int32 HouseID = 1;
 }
 
 message Verifier {

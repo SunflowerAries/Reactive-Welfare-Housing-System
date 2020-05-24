@@ -42,11 +42,32 @@ func main() {
 	// })
 	env := &Env{db, distributorPID, managerPID}
 	http.HandleFunc("/houses", env.housesIndex)
+	http.HandleFunc("/houses/check", env.housescheckIndex)
 	http.ListenAndServe(":3000", nil)
 }
 
-func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
+func (env *Env) housescheckIndex(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		decoder := json.NewDecoder(req.Body)
+		decoder.DisallowUnknownFields()
+		var checkids []int32
+		err := decoder.Decode(&checkids)
+		fmt.Println(checkids)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		if decoder.More() {
+			http.Error(w, "extraneous data after JSON object", http.StatusBadRequest)
+		}
+		// https://stackoverflow.com/questions/55381710/converting-internal-go-struct-array-to-protobuf-generated-pointer-array
+		rootContext.Request(env.managerPID, &sharedMessages.ExaminationList{HouseID: checkids})
+		// distributor.
+		// Do something with POST URL
+		// messages.
+	}
+}
 
+func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
 		// fmt.Fprintf(w, "Not Implement\n")
@@ -55,8 +76,8 @@ func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
 		// https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
 		decoder := json.NewDecoder(req.Body)
 		decoder.DisallowUnknownFields()
-		house := []storage.House{}
-		err := decoder.Decode(&house)
+		newhouse := []storage.House{}
+		err := decoder.Decode(&newhouse)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
@@ -64,14 +85,13 @@ func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "extraneous data after JSON object", http.StatusBadRequest)
 		}
 		// https://stackoverflow.com/questions/55381710/converting-internal-go-struct-array-to-protobuf-generated-pointer-array
-		houses := make([]*sharedMessages.House, len(house))
-		for i := range house {
-			houses[i] = &sharedMessages.House{Level: int32(house[i].Level), Age: int32(house[i].Age), Area: int32(house[i].Area)}
+		houses := make([]*sharedMessages.NewHouse, len(newhouse))
+		for i, house := range newhouse {
+			houses[i] = &sharedMessages.NewHouse{Level: house.Level, Age: house.Age, Area: house.Area}
 		}
-		rootContext.Request(env.managerPID, &sharedMessages.Houses{Houses: houses})
+		rootContext.Request(env.managerPID, &sharedMessages.NewHouses{Houses: houses})
 		// distributor.
 		// Do something with POST URL
 		// messages.
 	}
-
 }
