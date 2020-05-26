@@ -82,6 +82,44 @@ func (x *HouseApplicationReject) GetReason() string {
 	return ""
 }
 
+type NewHousesACK struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *NewHousesACK) Reset() {
+	*x = NewHousesACK{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NewHousesACK) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NewHousesACK) ProtoMessage() {}
+
+func (x *NewHousesACK) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NewHousesACK.ProtoReflect.Descriptor instead.
+func (*NewHousesACK) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{1}
+}
+
 type HouseApplicationResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -94,7 +132,7 @@ type HouseApplicationResponse struct {
 func (x *HouseApplicationResponse) Reset() {
 	*x = HouseApplicationResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -107,7 +145,7 @@ func (x *HouseApplicationResponse) String() string {
 func (*HouseApplicationResponse) ProtoMessage() {}
 
 func (x *HouseApplicationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -120,7 +158,7 @@ func (x *HouseApplicationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseApplicationResponse.ProtoReflect.Descriptor instead.
 func (*HouseApplicationResponse) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{1}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *HouseApplicationResponse) GetRequest() *verifierMessages.HouseApplicationRequest {
@@ -149,7 +187,7 @@ type HouseRecall struct {
 func (x *HouseRecall) Reset() {
 	*x = HouseRecall{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -162,7 +200,7 @@ func (x *HouseRecall) String() string {
 func (*HouseRecall) ProtoMessage() {}
 
 func (x *HouseRecall) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +213,7 @@ func (x *HouseRecall) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseRecall.ProtoReflect.Descriptor instead.
 func (*HouseRecall) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{2}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *HouseRecall) GetFamilyID() int32 {
@@ -203,7 +241,7 @@ type HouseCheckOutResponse struct {
 func (x *HouseCheckOutResponse) Reset() {
 	*x = HouseCheckOutResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -216,7 +254,7 @@ func (x *HouseCheckOutResponse) String() string {
 func (*HouseCheckOutResponse) ProtoMessage() {}
 
 func (x *HouseCheckOutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -229,7 +267,7 @@ func (x *HouseCheckOutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOutResponse.ProtoReflect.Descriptor instead.
 func (*HouseCheckOutResponse) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{3}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HouseCheckOutResponse) GetAnswer() string {
@@ -251,7 +289,7 @@ type HouseCheckOut struct {
 func (x *HouseCheckOut) Reset() {
 	*x = HouseCheckOut{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -264,7 +302,7 @@ func (x *HouseCheckOut) String() string {
 func (*HouseCheckOut) ProtoMessage() {}
 
 func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -277,7 +315,7 @@ func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOut.ProtoReflect.Descriptor instead.
 func (*HouseCheckOut) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{4}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *HouseCheckOut) GetFamilyID() int32 {
@@ -308,7 +346,7 @@ type HouseMatch struct {
 func (x *HouseMatch) Reset() {
 	*x = HouseMatch{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -321,7 +359,7 @@ func (x *HouseMatch) String() string {
 func (*HouseMatch) ProtoMessage() {}
 
 func (x *HouseMatch) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -334,7 +372,7 @@ func (x *HouseMatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseMatch.ProtoReflect.Descriptor instead.
 func (*HouseMatch) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{5}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *HouseMatch) GetFamilyID() int32 {
@@ -387,7 +425,8 @@ var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc 
 	0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x52, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x61,
 	0x73, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x65, 0x61, 0x73, 0x6f,
-	0x6e, 0x22, 0x71, 0x0a, 0x18, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63,
+	0x6e, 0x22, 0x0e, 0x0a, 0x0c, 0x4e, 0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x41, 0x43,
+	0x4b, 0x22, 0x71, 0x0a, 0x18, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63,
 	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3b, 0x0a,
 	0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21,
 	0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41,
@@ -432,19 +471,20 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc
 	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescData
 }
 
-var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_goTypes = []interface{}{
 	(*HouseApplicationReject)(nil),                   // 0: distributor.HouseApplicationReject
-	(*HouseApplicationResponse)(nil),                 // 1: distributor.HouseApplicationResponse
-	(*HouseRecall)(nil),                              // 2: distributor.HouseRecall
-	(*HouseCheckOutResponse)(nil),                    // 3: distributor.HouseCheckOutResponse
-	(*HouseCheckOut)(nil),                            // 4: distributor.HouseCheckOut
-	(*HouseMatch)(nil),                               // 5: distributor.HouseMatch
-	(*verifierMessages.HouseApplicationRequest)(nil), // 6: verifier.HouseApplicationRequest
+	(*NewHousesACK)(nil),                             // 1: distributor.NewHousesACK
+	(*HouseApplicationResponse)(nil),                 // 2: distributor.HouseApplicationResponse
+	(*HouseRecall)(nil),                              // 3: distributor.HouseRecall
+	(*HouseCheckOutResponse)(nil),                    // 4: distributor.HouseCheckOutResponse
+	(*HouseCheckOut)(nil),                            // 5: distributor.HouseCheckOut
+	(*HouseMatch)(nil),                               // 6: distributor.HouseMatch
+	(*verifierMessages.HouseApplicationRequest)(nil), // 7: verifier.HouseApplicationRequest
 }
 var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_depIdxs = []int32{
-	6, // 0: distributor.HouseApplicationReject.Request:type_name -> verifier.HouseApplicationRequest
-	6, // 1: distributor.HouseApplicationResponse.Request:type_name -> verifier.HouseApplicationRequest
+	7, // 0: distributor.HouseApplicationReject.Request:type_name -> verifier.HouseApplicationRequest
+	7, // 1: distributor.HouseApplicationResponse.Request:type_name -> verifier.HouseApplicationRequest
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -471,7 +511,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseApplicationResponse); i {
+			switch v := v.(*NewHousesACK); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -483,7 +523,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseRecall); i {
+			switch v := v.(*HouseApplicationResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -495,7 +535,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseCheckOutResponse); i {
+			switch v := v.(*HouseRecall); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -507,7 +547,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseCheckOut); i {
+			switch v := v.(*HouseCheckOutResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -519,6 +559,18 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HouseCheckOut); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*HouseMatch); i {
 			case 0:
 				return &v.state
@@ -537,7 +589,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -5,10 +5,13 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
 	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
+	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
 	"Reactive-Welfare-Housing-System/src/property"
 	"Reactive-Welfare-Housing-System/src/storage"
 	"fmt"
+	"log"
 	"reflect"
+	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/router"
@@ -18,6 +21,7 @@ type managerActor struct {
 	db             storage.HouseSystem
 	distributorPID *actor.PID
 	propertyPID    *actor.PID
+	verifierPID    *actor.PID
 }
 
 func (m *managerActor) Receive(ctx actor.Context) {
@@ -41,21 +45,78 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		for _, house := range houses {
 			newhouses = append(newhouses, &sharedMessages.NewHouse{ID: house.ID, Level: house.Level})
 		}
-		ctx.Send(m.distributorPID, &managerMessages.NewHouses{Houses: &sharedMessages.NewHouses{Houses: newhouses}})
-	// TCP
+		future := ctx.RequestFuture(m.distributorPID, &managerMessages.NewHouses{Houses: &sharedMessages.NewHouses{Houses: newhouses}}, 2000*time.Millisecond)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				ctx.Self().Tell(msg)
+				return
+			}
+
+			switch res.(type) {
+			case *distributorMessages.NewHousesACK:
+				log.Print("Received Newhouse ACK")
+			default:
+				log.Print("Received unexpected response: %#v", res)
+			}
+		})
 	case *sharedMessages.DistributorConnect:
 		m.distributorPID = msg.Sender
 		fmt.Println("In manager", msg.Sender)
 	case *sharedMessages.ExaminationList:
-		ctx.Request(m.propertyPID, &managerMessages.ExaminationList{HouseID: msg.HouseID})
+		future := ctx.RequestFuture(m.propertyPID, &managerMessages.ExaminationList{HouseID: msg.HouseID}, 2000*time.Millisecond)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				ctx.Self().Tell(msg)
+				return
+			}
+
+			switch res.(type) {
+			case *propertyMessages.ExaminationACK:
+				log.Print("Received Examination ACK")
+			case *propertyMessages.ExaminationRejects:
+				ctx.Self().Tell(res.(*propertyMessages.ExaminationRejects))
+			default:
+				log.Print("Received unexpected response: %#v", res)
+			}
+		})
 	case *distributorMessages.HouseMatch:
-		err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
-		if err != nil {
+		ret, err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
+		if err != nil || !ret.FamilyOwnHouse {
 			fmt.Printf("Insert house failed, err:%v", err)
 			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg})
 			return
 		}
-		ctx.Respond(&managerMessages.HouseMatchApprove{Match: msg})
+		if ret.Success {
+			ctx.Respond(&managerMessages.HouseMatchACK{})
+			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchApprove{Match: msg}, 2000*time.Millisecond)
+			ctx.AwaitFuture(future, func(res interface{}, err error) {
+				if err != nil {
+					ctx.Self().Tell(msg)
+					return
+				}
+				switch res.(type) {
+				case *verifierMessages.HouseMatchApproveACK:
+					log.Print("Received HouseMatchApprove ACK")
+				default:
+					log.Print("Received unexpected response: %#v", res)
+				}
+			})
+		} else {
+			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg})
+			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchReject{Match: msg, Reason: "对不起，一户家庭不能租住超过一套保障房"}, 2000*time.Millisecond)
+			ctx.AwaitFuture(future, func(res interface{}, err error) {
+				if err != nil {
+					ctx.Self().Tell(msg)
+					return
+				}
+				switch res.(type) {
+				case *verifierMessages.HouseMatchRejectACK:
+					log.Print("Received HouseMatchReject ACK")
+				default:
+					log.Print("Received unexpected response: %#v", res)
+				}
+			})
+		}
 	case *distributorMessages.HouseCheckOut:
 		err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
 		if err != nil {
@@ -63,6 +124,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 			return
 		}
 	case *propertyMessages.ExaminationRejects:
+		fmt.Println(msg)
 		var houses []*propertyMessages.ExaminationReject
 		var ids []int32
 		for _, house := range msg.Houses {

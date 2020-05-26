@@ -15,6 +15,14 @@ message HouseApplicationResponse {
 
 }
 
+message HouseMatchApproveACK {
+
+}
+
+message HouseMatchRejectACK {
+    
+}
+
 message HouseCheckOut {
     tenant.HouseApplicationRequest UserInfo = 1;
     int32 FamilyID = 2;

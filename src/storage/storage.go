@@ -34,7 +34,7 @@ type Reside struct {
 }
 
 type NullableReside struct {
-	HouseID  int32
+	HouseID  sql.NullInt32
 	Level    int32
 	Age      int32
 	Area     int32
@@ -56,10 +56,16 @@ const MAXARGS = 65535
 
 const HouseArgs = "house.id, house.age, house.area, house.level"
 
+type MatchResponse struct {
+	FamilyOwnHouse bool
+	HouseMatched   bool
+	Success        bool
+}
+
 type HouseSystem interface {
 	InitMatchCache() ([HouseLevel + 1][]Reside, [HouseLevel + 1][]Reside)
 	BatchInsertHouse(records []House) []int
-	InsertMatch(reside Reside) error
+	InsertMatch(reside Reside) (MatchResponse, error)
 	CheckOutHouse(reside Reside) error
 	QueryHouse(HouseID []int32) []Reside
 	DeleteHouse(HouseID []int32) error
@@ -90,7 +96,8 @@ func (db *DB) QueryHouse(HouseID []int32) []Reside {
 	for i, id := range HouseID {
 		args[i] = id
 	}
-	stmt := `SELECT ` + HouseArgs + `, reside.family_id ` + `FROM house LEFT JOIN reside ON house.id = reside.house_id WHERE house.id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
+	stmt := `SELECT H.id, H.age, H.area, H.level, R.family_id FROM (SELECT * FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `) AND deleted = false) AS H
+	 LEFT JOIN (SELECT * FROM reside WHERE checkout = false) AS R ON H.id = R.house_id`
 	rows, err := db.Query(stmt, args...)
 	if err != nil {
 		fmt.Println("QueryHouse error: ", err)
@@ -103,23 +110,47 @@ func (db *DB) QueryHouse(HouseID []int32) []Reside {
 			log.Panic(err)
 		}
 		if house.FamilyID.Valid {
-			examined = append(examined, Reside{HouseID: house.HouseID, Area: house.Area, Age: house.Age, FamilyID: house.FamilyID.Int32, Level: house.Level})
+			examined = append(examined, Reside{HouseID: house.HouseID.Int32, Area: house.Area, Age: house.Age, FamilyID: house.FamilyID.Int32, Level: house.Level})
 		} else {
-			examined = append(examined, Reside{HouseID: house.HouseID, Area: house.Area, Age: house.Age, FamilyID: 0, Level: house.Level})
+			examined = append(examined, Reside{HouseID: house.HouseID.Int32, Area: house.Area, Age: house.Age, FamilyID: 0, Level: house.Level})
 		}
 	}
 	return examined
 }
 
-func (db *DB) InsertMatch(reside Reside) error {
+func (db *DB) InsertMatch(reside Reside) (MatchResponse, error) {
 	tx, _ := db.Begin()
 	var id int32
-	if err := tx.QueryRow("SELECT id FROM house WHERE id = ? AND deleted = false", reside.HouseID).Scan(&id); err != nil {
-		fmt.Println(err)
-		return err
+	if err := tx.QueryRow(`SELECT id FROM house WHERE id = ? AND deleted = false`, reside.HouseID).Scan(&id); err != nil {
+		return MatchResponse{}, err
+	}
+	// mysql do not support (full) outer join so refer https://stackoverflow.com/questions/4796872/how-to-do-a-full-outer-join-in-mysql
+	rows, _ := tx.Query(`SELECT H.id, R.family_id FROM (SELECT * FROM house where id = ? AND deleted = false) as H 
+						LEFT JOIN (SELECT * FROM reside WHERE checkout = false) AS R ON H.id = R.house_id
+						UNION
+						SELECT H.id, R.family_id FROM (SELECT * FROM house where deleted = false) as H
+						RIGHT JOIN (SELECT * FROM reside WHERE family_id = ? AND checkout = false) AS R ON H.id = R.house_id`, reside.HouseID, reside.FamilyID, reside.HouseID, reside.FamilyID)
+
+	var res MatchResponse
+	for rows.Next() {
+		var rid NullableReside
+		if err := rows.Scan(&rid.HouseID, &rid.FamilyID); err != nil {
+			log.Print(err)
+		}
+		if rid.FamilyID.Valid {
+			if rid.HouseID.Int32 != reside.HouseID {
+				res.FamilyOwnHouse = true
+			} else if rid.FamilyID.Int32 != reside.FamilyID {
+				res.HouseMatched = true
+			}
+			res.Success = true
+		}
+	}
+	if res.FamilyOwnHouse || res.HouseMatched || res.Success {
+		return res, nil
 	}
 	_, err := db.Exec("INSERT INTO reside (house_id, family_id) VALUES (?, ?)", reside.HouseID, reside.FamilyID)
-	return err
+	return MatchResponse{Success: true}, err
 }
 
 func (db *DB) CheckOutHouse(reside Reside) error {
@@ -142,9 +173,9 @@ func (db *DB) InitMatchCache() ([HouseLevel + 1][]Reside, [HouseLevel + 1][]Resi
 			log.Panic(err)
 		}
 		if reside.FamilyID.Valid {
-			rented[reside.Level] = append(rented[reside.Level], Reside{HouseID: reside.HouseID, FamilyID: reside.FamilyID.Int32, Level: reside.Level})
+			rented[reside.Level] = append(rented[reside.Level], Reside{HouseID: reside.HouseID.Int32, FamilyID: reside.FamilyID.Int32, Level: reside.Level})
 		} else {
-			vacant[reside.Level] = append(vacant[reside.Level], Reside{HouseID: reside.HouseID, Level: reside.Level})
+			vacant[reside.Level] = append(vacant[reside.Level], Reside{HouseID: reside.HouseID.Int32, Level: reside.Level})
 		}
 	}
 	return rented, vacant

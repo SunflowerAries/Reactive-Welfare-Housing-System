@@ -120,6 +120,82 @@ func (*HouseApplicationResponse) Descriptor() ([]byte, []int) {
 	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZIP(), []int{1}
 }
 
+type HouseMatchApproveACK struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *HouseMatchApproveACK) Reset() {
+	*x = HouseMatchApproveACK{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HouseMatchApproveACK) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HouseMatchApproveACK) ProtoMessage() {}
+
+func (x *HouseMatchApproveACK) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HouseMatchApproveACK.ProtoReflect.Descriptor instead.
+func (*HouseMatchApproveACK) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZIP(), []int{2}
+}
+
+type HouseMatchRejectACK struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *HouseMatchRejectACK) Reset() {
+	*x = HouseMatchRejectACK{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HouseMatchRejectACK) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HouseMatchRejectACK) ProtoMessage() {}
+
+func (x *HouseMatchRejectACK) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HouseMatchRejectACK.ProtoReflect.Descriptor instead.
+func (*HouseMatchRejectACK) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZIP(), []int{3}
+}
+
 type HouseCheckOut struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -133,7 +209,7 @@ type HouseCheckOut struct {
 func (x *HouseCheckOut) Reset() {
 	*x = HouseCheckOut{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[2]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -146,7 +222,7 @@ func (x *HouseCheckOut) String() string {
 func (*HouseCheckOut) ProtoMessage() {}
 
 func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[2]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -159,7 +235,7 @@ func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOut.ProtoReflect.Descriptor instead.
 func (*HouseCheckOut) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZIP(), []int{2}
+	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HouseCheckOut) GetUserInfo() *tenantMessages.HouseApplicationRequest {
@@ -204,19 +280,22 @@ var file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDesc = [
 	0x44, 0x12, 0x14, 0x0a, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x22, 0x1a, 0x0a, 0x18, 0x48, 0x6f, 0x75, 0x73, 0x65,
 	0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x7e, 0x0a, 0x0d, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63,
-	0x6b, 0x4f, 0x75, 0x74, 0x12, 0x3b, 0x0a, 0x08, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x74, 0x65, 0x6e, 0x61, 0x6e, 0x74, 0x2e,
-	0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x08, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66,
-	0x6f, 0x12, 0x1a, 0x0a, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x05, 0x52, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x14, 0x0a,
-	0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c, 0x65,
-	0x76, 0x65, 0x6c, 0x42, 0x3f, 0x5a, 0x3d, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d,
-	0x57, 0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d,
-	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73,
-	0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x73, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63,
+	0x68, 0x41, 0x70, 0x70, 0x72, 0x6f, 0x76, 0x65, 0x41, 0x43, 0x4b, 0x22, 0x15, 0x0a, 0x13, 0x48,
+	0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x65, 0x6a, 0x65, 0x63, 0x74, 0x41,
+	0x43, 0x4b, 0x22, 0x7e, 0x0a, 0x0d, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b,
+	0x4f, 0x75, 0x74, 0x12, 0x3b, 0x0a, 0x08, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x74, 0x65, 0x6e, 0x61, 0x6e, 0x74, 0x2e, 0x48,
+	0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x08, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f,
+	0x12, 0x1a, 0x0a, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05,
+	0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c, 0x65, 0x76,
+	0x65, 0x6c, 0x42, 0x3f, 0x5a, 0x3d, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d, 0x57,
+	0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d, 0x53,
+	0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -231,15 +310,17 @@ func file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescGZI
 	return file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDescData
 }
 
-var file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_goTypes = []interface{}{
 	(*HouseApplicationRequest)(nil),                // 0: verifier.HouseApplicationRequest
 	(*HouseApplicationResponse)(nil),               // 1: verifier.HouseApplicationResponse
-	(*HouseCheckOut)(nil),                          // 2: verifier.HouseCheckOut
-	(*tenantMessages.HouseApplicationRequest)(nil), // 3: tenant.HouseApplicationRequest
+	(*HouseMatchApproveACK)(nil),                   // 2: verifier.HouseMatchApproveACK
+	(*HouseMatchRejectACK)(nil),                    // 3: verifier.HouseMatchRejectACK
+	(*HouseCheckOut)(nil),                          // 4: verifier.HouseCheckOut
+	(*tenantMessages.HouseApplicationRequest)(nil), // 5: tenant.HouseApplicationRequest
 }
 var file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_depIdxs = []int32{
-	3, // 0: verifier.HouseCheckOut.UserInfo:type_name -> tenant.HouseApplicationRequest
+	5, // 0: verifier.HouseCheckOut.UserInfo:type_name -> tenant.HouseApplicationRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -278,6 +359,30 @@ func file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_init() {
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HouseMatchApproveACK); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HouseMatchRejectACK); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*HouseCheckOut); i {
 			case 0:
 				return &v.state
@@ -296,7 +401,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Reactive_Welfare_Housing_System_src_messages_verifier_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

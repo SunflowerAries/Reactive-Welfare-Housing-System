@@ -11,6 +11,10 @@ message HouseApplicationReject {
     string Reason = 2;
 }
 
+message NewHousesACK {
+    
+}
+
 message HouseApplicationResponse {
     verifier.HouseApplicationRequest Request = 1;
     int32 HouseID = 2;

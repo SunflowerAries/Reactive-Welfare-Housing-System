@@ -14,10 +14,15 @@ message HouseMatchApprove {
 
 message HouseMatchReject {
     distributor.HouseMatch Match = 1;
+    string Reason = 2;
 }
 
 message NewHouses {
     shared.NewHouses Houses = 1;
+}
+
+message HouseMatchACK {
+    
 }
 
 message UnqualifiedHouses {

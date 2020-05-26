@@ -29,7 +29,11 @@ func (p *propertyActor) Receive(ctx actor.Context) {
 				houses = append(houses, &propertyMessages.ExaminationReject{House: rejected, FamilyID: house.FamilyID})
 			}
 		}
-		ctx.Respond(&propertyMessages.ExaminationRejects{Houses: houses})
+		if len(houses) == 0 {
+			ctx.Respond(&propertyMessages.ExaminationACK{})
+		} else {
+			ctx.Respond(&propertyMessages.ExaminationRejects{Houses: houses})
+		}
 	}
 }
 

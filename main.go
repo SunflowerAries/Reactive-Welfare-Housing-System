@@ -36,7 +36,6 @@ func main() {
 	rootContext.Send(distributorPID, &sharedMessages.ManagerConnect{
 		Sender: managerPID,
 	})
-	fmt.Println(5/2, 5/3)
 	// rootContext.Send(managerPID, &sharedMessages.Connect{
 	// 	Sender: distributorPID,
 	// })

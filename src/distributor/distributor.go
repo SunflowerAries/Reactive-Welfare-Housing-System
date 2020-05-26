@@ -79,6 +79,7 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 			}
 			fmt.Printf("\n")
 		}
+		ctx.Respond(&distributorMessages.NewHousesACK{})
 	case *managerMessages.UnqualifiedHouses:
 		// 一次处理一条过于低效，需要优化
 		for _, deleted := range msg.Houses {

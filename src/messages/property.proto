@@ -21,6 +21,10 @@ message ExaminationReject {
     int32 FamilyID = 2;
 }
 
+message ExaminationACK {
+    
+}
+
 message ExaminationRejects {
     repeated ExaminationReject Houses = 1;
 }
