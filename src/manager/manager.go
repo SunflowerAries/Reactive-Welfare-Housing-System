@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"Reactive-Welfare-Housing-System/src/distributor"
 	"Reactive-Welfare-Housing-System/src/messages/distributorMessages"
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
@@ -8,6 +9,7 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
 	"Reactive-Welfare-Housing-System/src/property"
 	"Reactive-Welfare-Housing-System/src/storage"
+	"database/sql"
 	"fmt"
 	"log"
 	"reflect"
@@ -63,6 +65,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		m.distributorPID = msg.Sender
 		fmt.Println("In manager", msg.Sender)
 	case *sharedMessages.ExaminationList:
+		fmt.Print(msg)
 		future := ctx.RequestFuture(m.propertyPID, &managerMessages.ExaminationList{HouseID: msg.HouseID}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
@@ -82,8 +85,16 @@ func (m *managerActor) Receive(ctx actor.Context) {
 	case *distributorMessages.HouseMatch:
 		ret, err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
 		if err != nil || !ret.FamilyOwnHouse {
-			fmt.Printf("Insert house failed, err:%v", err)
-			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg})
+			log.Print("Insert house failed, err:%v", err)
+			var reason int32
+			if ret.HouseMatched {
+				reason = distributor.HOUSEMATCHED
+			} else if err == sql.ErrNoRows {
+				reason = distributor.HOUSEDONOTEXIST
+			} else {
+				log.Panic(err)
+			}
+			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg, Reason: reason})
 			return
 		}
 		if ret.Success {
@@ -102,8 +113,11 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				}
 			})
 		} else {
-			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg})
-			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchReject{Match: msg, Reason: "对不起，一户家庭不能租住超过一套保障房"}, 2000*time.Millisecond)
+			if ret.FamilyOwnHouse != true {
+				log.Panic(ret)
+			}
+			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg, Reason: distributor.HAVEONEHOUSE})
+			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchReject{Match: msg, Reason: distributor.HAVEONEHOUSE}, 2000*time.Millisecond)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				if err != nil {
 					ctx.Self().Tell(msg)
@@ -118,25 +132,96 @@ func (m *managerActor) Receive(ctx actor.Context) {
 			})
 		}
 	case *distributorMessages.HouseCheckOut:
-		err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
-		if err != nil {
-			fmt.Printf("Checkout house failed, err:%v", err)
-			return
+		if msg.Retry != true {
+			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
+			if err != nil {
+				log.Print("Checkout house failed, err:%v", err)
+				return
+			}
+			ctx.Respond(&managerMessages.HouseCheckOutACK{})
 		}
+		future := ctx.RequestFuture(m.verifierPID, msg, 2000*time.Millisecond)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				ctx.Self().Tell(msg)
+				return
+			}
+
+			switch res.(type) {
+			case *verifierMessages.HouseCheckOutACK:
+				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
+				log.Print("Received UnqualifiedResides ACK")
+			default:
+				log.Print("Received unexpected response: %#v", res)
+			}
+		})
 	case *propertyMessages.ExaminationRejects:
-		fmt.Println(msg)
-		var houses []*propertyMessages.ExaminationReject
-		var ids []int32
+		var updatedhouses, houses []*propertyMessages.ExaminationReject
+		var updatedids, deletedids []int32
 		for _, house := range msg.Houses {
+			if house.FamilyID != 0 {
+				updatedhouses = append(updatedhouses, house)
+				updatedids = append(updatedids, house.House.ID)
+			} else {
+				deletedids = append(deletedids, house.House.ID)
+			}
 			houses = append(houses, house)
-			ids = append(ids, house.House.ID)
 		}
-		err := m.db.DeleteHouse(ids)
-		if err != nil {
-			fmt.Printf("Delete house failed, err:%v", err)
-			return
+		if len(updatedids) != 0 {
+			err := m.db.SignedDeleteHouse(updatedids)
+			if err != nil {
+				log.Print("Update house failed, err:%v", err)
+			}
 		}
-		ctx.Request(m.distributorPID, &managerMessages.UnqualifiedHouses{Houses: houses})
+		if len(deletedids) != 0 {
+			err := m.db.DeleteHouse(deletedids)
+			if err != nil {
+				log.Print("Delete house failed, err:%v", err)
+			}
+		}
+
+		ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: updatedhouses})
+		ctx.Self().Tell(&managerMessages.UnqualifiedHouses{Houses: houses})
+	case *managerMessages.UnqualifiedHouses:
+		fmt.Println(msg)
+		future := ctx.RequestFuture(m.distributorPID, msg, 2000*time.Millisecond)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				ctx.Self().Tell(msg)
+				return
+			}
+
+			switch res.(type) {
+			case *distributorMessages.UnqualifiedResidesACK:
+				log.Print("Received UnqualifiedResides ACK")
+			default:
+				log.Print("Received unexpected response: %#v", res)
+			}
+		})
+	case *managerMessages.UnqualifiedResides:
+		fmt.Println(msg)
+		future := ctx.RequestFuture(m.verifierPID, msg, 2000*time.Millisecond)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				ctx.Self().Tell(msg)
+				return
+			}
+
+			switch res.(type) {
+			case *verifierMessages.UnqualifiedResidesACK:
+				log.Print("Received UnqualifiedResides ACK")
+				var ids []int32
+				for _, house := range msg.Resides {
+					ids = append(ids, house.House.ID)
+				}
+				err := m.db.DeleteHouse(ids)
+				if err != nil {
+					log.Print("Delete house failed, err:%v", err)
+				}
+			default:
+				log.Print("Received unexpected response: %#v", res)
+			}
+		})
 	default:
 		fmt.Println(reflect.TypeOf(msg), msg)
 	}

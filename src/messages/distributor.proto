@@ -15,14 +15,13 @@ message NewHousesACK {
     
 }
 
-message HouseApplicationResponse {
-    verifier.HouseApplicationRequest Request = 1;
-    int32 HouseID = 2;
+message HouseApplicationACK {
+
 }
 
-message HouseRecall {
-    int32 FamilyID = 1;
-    int32 HouseID = 2;
+message MatchEmptyHouse {
+    verifier.HouseApplicationRequest Request = 1;
+    int32 Retry = 2;
 }
 
 message HouseCheckOutResponse {
@@ -32,11 +31,19 @@ message HouseCheckOutResponse {
 message HouseCheckOut {
     int32 FamilyID = 1;
     int32 HouseID = 2;
+    bool Retry = 3;
+}
+
+message HouseCheckOutACK {
+
+}
+
+message UnqualifiedResidesACK {
+
 }
 
 message HouseMatch {
     int32 FamilyID = 1;
     int32 HouseID = 2;
     int32 Level = 3;
-    int32 Index = 4;
 }

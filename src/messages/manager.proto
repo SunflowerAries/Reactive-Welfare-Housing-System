@@ -14,7 +14,7 @@ message HouseMatchApprove {
 
 message HouseMatchReject {
     distributor.HouseMatch Match = 1;
-    string Reason = 2;
+    int32 Reason = 2;
 }
 
 message NewHouses {
@@ -25,8 +25,16 @@ message HouseMatchACK {
     
 }
 
+message HouseCheckOutACK {
+    
+}
+
 message UnqualifiedHouses {
     repeated property.ExaminationReject Houses = 1;
+}
+
+message UnqualifiedResides {
+    repeated property.ExaminationReject Resides = 1;
 }
 
 message ExaminationList {

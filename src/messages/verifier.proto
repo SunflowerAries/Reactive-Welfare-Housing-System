@@ -7,8 +7,9 @@ import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/tenant.proto";
 
 message HouseApplicationRequest {
-    int32 FamilyID = 2;
-    int32 Level = 3;
+    int32 FamilyID = 1;
+    int32 Level = 2;
+    int32 Retry = 3;
 }
 
 message HouseApplicationResponse {
@@ -23,8 +24,17 @@ message HouseMatchRejectACK {
     
 }
 
+message UnqualifiedResidesACK {
+
+}
+
 message HouseCheckOut {
     tenant.HouseApplicationRequest UserInfo = 1;
     int32 FamilyID = 2;
     int32 Level = 3;
+    int32 Retry = 4;
+}
+
+message HouseCheckOutACK {
+    
 }

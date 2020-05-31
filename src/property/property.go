@@ -4,6 +4,7 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
 	"Reactive-Welfare-Housing-System/src/storage"
+	"fmt"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
@@ -24,8 +25,9 @@ func (p *propertyActor) Receive(ctx actor.Context) {
 		ExaminedHouse := p.db.QueryHouse(msg.HouseID)
 		var houses []*propertyMessages.ExaminationReject
 		for _, house := range ExaminedHouse {
+			fmt.Println(house)
 			if ExamHouse(house) != true {
-				rejected := &propertyMessages.ExaminedHouse{ID: house.HouseID, Level: house.Level, Age: house.Age, Area: house.Age}
+				rejected := &propertyMessages.ExaminedHouse{ID: house.HouseID, Level: house.Level, Age: house.Age, Area: house.Area}
 				houses = append(houses, &propertyMessages.ExaminationReject{House: rejected, FamilyID: house.FamilyID})
 			}
 		}

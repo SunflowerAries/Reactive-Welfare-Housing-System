@@ -68,7 +68,9 @@ type HouseSystem interface {
 	InsertMatch(reside Reside) (MatchResponse, error)
 	CheckOutHouse(reside Reside) error
 	QueryHouse(HouseID []int32) []Reside
+	SignedDeleteHouse(HouseID []int32) error
 	DeleteHouse(HouseID []int32) error
+	DeleteReside(reside Reside)
 }
 
 type DB struct {
@@ -86,7 +88,21 @@ func (db *DB) DeleteHouse(HouseID []int32) error {
 	for i, id := range HouseID {
 		args[i] = id
 	}
-	stmt := `UPDATE house LEFT JOIN reside ON house.id = reside.house_id SET house.deleted = True, reside.checkout = True WHERE house.id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
+	stmt := `DELETE FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
+	_, err := db.Exec(stmt, args...)
+	return err
+}
+
+func (db *DB) DeleteReside(reside Reside) {
+	db.Exec(`DELETE FROM reside WHERE house_id = ? AND family_id = ?`, reside.HouseID, reside.FamilyID)
+}
+
+func (db *DB) SignedDeleteHouse(HouseID []int32) error {
+	args := make([]interface{}, len(HouseID))
+	for i, id := range HouseID {
+		args[i] = id
+	}
+	stmt := `UPDATE house LEFT JOIN reside ON house.id = reside.house_id SET house.deleted = true, reside.checkout = true WHERE house.id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
 	_, err := db.Exec(stmt, args...)
 	return err
 }
@@ -142,8 +158,9 @@ func (db *DB) InsertMatch(reside Reside) (MatchResponse, error) {
 				res.FamilyOwnHouse = true
 			} else if rid.FamilyID.Int32 != reside.FamilyID {
 				res.HouseMatched = true
+			} else {
+				res.Success = true
 			}
-			res.Success = true
 		}
 	}
 	if res.FamilyOwnHouse || res.HouseMatched || res.Success {

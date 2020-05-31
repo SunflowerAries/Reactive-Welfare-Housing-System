@@ -29,10 +29,11 @@ func (t *Actor) Receive(ctx actor.Context) {
 		// shared.Use(verifierActor)
 	case *actor.Stopped:
 		fmt.Println("Verifier Stopped, actor and its children are stopped")
-	case *tenantMessage.HouseApplicationRequest:
-		fmt.Println("Verifier Received a application from ", msg.UserName)
-		ctx.Send(ctx.Sender(), &tenantMessage.HouseApplicationResponse{})
-	}
+	// case *tenantMessage.HouseApplicationRequest:
+	// 	fmt.Println("Verifier Received a application from ", msg.UserName)
+	// 	ctx.Send(ctx.Sender(), &tenantMessage.HouseApplicationResponse{})
+	// }
+
 }
 
 func newVerifierActor() actor.Actor {
@@ -40,8 +41,8 @@ func newVerifierActor() actor.Actor {
 }
 
 func init() {
-	remote.Start("127.0.0.1:8080")
-	remote.Register("Verifier", actor.PropsFromProducer(newVerifierActor))
+	// remote.Start("127.0.0.1:8080")
+	// remote.Register("Verifier", actor.PropsFromProducer(newVerifierActor))
 	// var rootContext = actor.EmptyRootContext
 	// props := actor.PropsFromProducer(func() actor.Actor { return &Actor{} })
 	// rootContext.SpawnNamed(props, "Verifier")
