@@ -21,7 +21,6 @@ message HouseApplicationACK {
 
 message MatchEmptyHouse {
     verifier.HouseApplicationRequest Request = 1;
-    int32 Retry = 2;
 }
 
 message HouseCheckOutResponse {
@@ -38,7 +37,7 @@ message HouseCheckOutACK {
 
 }
 
-message UnqualifiedResidesACK {
+message UnqualifiedHousesACK {
 
 }
 

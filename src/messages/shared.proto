@@ -28,6 +28,24 @@ message ExaminationList {
     repeated int32 HouseID = 1;
 }
 
-message Verifier {
+message VerifierConnect {
+    actor.PID Sender = 1;
+}
 
+message NewRequests {
+    repeated NewRequest Requests = 1;
+}
+
+message NewRequest {
+    int32 FamilyID = 1;
+    int32 Level = 2;
+}
+
+message NewCheckOuts {
+    repeated NewCheckOut CheckOuts = 1;
+}
+
+message NewCheckOut {
+    int32 FamilyID = 1;
+    int32 Level = 2;
 }

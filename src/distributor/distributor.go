@@ -24,6 +24,7 @@ type distributorActor struct {
 const HAVEONEHOUSE = 1
 const HOUSEMATCHED = 2
 const HOUSEDONOTEXIST = 3
+const FAMILYDONOTEXIST = 4
 
 func (d *distributorActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
@@ -43,9 +44,10 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 			}
 			fmt.Printf("\n")
 		}
+	case *sharedMessages.VerifierConnect:
+		d.verifierPID = msg.Sender
 	case *sharedMessages.ManagerConnect:
 		d.managerPID = msg.Sender
-		fmt.Println("In distributor", msg.Sender)
 		ctx.Send(d.managerPID, &sharedMessages.DistributorConnect{Sender: ctx.Self()})
 	case *managerMessages.NewHouses:
 		for _, vacant := range msg.Houses.Houses {
@@ -63,22 +65,22 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 		// 一次处理一条过于低效，需要优化
 		for _, deleted := range msg.Houses {
 			if deleted.FamilyID != 0 {
-				for index, occupied := range d.occupied[deleted.House.Level] {
-					if occupied.HouseID == deleted.House.ID && occupied.FamilyID == deleted.FamilyID {
-						d.occupied[deleted.House.Level], _ = storage.RemoveReside(d.occupied[deleted.House.Level], index)
+				for index, occupied := range d.occupied[deleted.Level] {
+					if occupied.HouseID == deleted.HouseID && occupied.FamilyID == deleted.FamilyID {
+						d.occupied[deleted.Level], _ = storage.RemoveReside(d.occupied[deleted.Level], index)
 						break
 					}
 				}
 			} else {
-				for index, vacant := range d.vacant[deleted.House.Level] {
-					if vacant.HouseID == deleted.House.ID {
-						d.vacant[deleted.House.Level], _ = storage.RemoveReside(d.vacant[deleted.House.Level], index)
+				for index, vacant := range d.vacant[deleted.Level] {
+					if vacant.HouseID == deleted.HouseID {
+						d.vacant[deleted.Level], _ = storage.RemoveReside(d.vacant[deleted.Level], index)
 						break
 					}
 				}
 			}
 		}
-		ctx.Respond(&distributorMessages.UnqualifiedResidesACK{})
+		ctx.Respond(&distributorMessages.UnqualifiedHousesACK{})
 	case *verifierMessages.HouseCheckOut:
 		var index = -1
 		if msg.Retry != -1 {
@@ -111,10 +113,15 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 
 			switch res.(type) {
 			case *managerMessages.HouseCheckOutACK:
-				d.occupied[msg.Level], _ = storage.RemoveReside(d.occupied[msg.Level], index)
-				log.Print("Received HouseCheckOut ACK")
+				for i, occupied := range d.occupied[msg.Level] {
+					if occupied.FamilyID == msg.FamilyID && occupied.CheckOut != true {
+						d.occupied[msg.Level], _ = storage.RemoveReside(d.occupied[msg.Level], i)
+						break
+					}
+				}
+				log.Print("Distributor: Received HouseCheckOut ACK")
 			default:
-				log.Print("Received unexpected response: %#v", res)
+				log.Print("Distributor: Received unexpected response, ", res)
 			}
 		})
 	case *verifierMessages.HouseApplicationRequest:
@@ -144,13 +151,18 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 
 			switch res.(type) {
 			case *managerMessages.HouseMatchACK:
-				log.Print("Received HouseMatch ACK")
+				log.Print("Distributor: Received HouseMatch ACK")
 			case *managerMessages.HouseMatchReject:
 				recv := res.(*managerMessages.HouseMatchReject)
 				var occupied storage.Reside
-				d.occupied[msg.Level], occupied = storage.RemoveReside(d.occupied[msg.Level], index)
+				for i, occupied := range d.occupied[msg.Level] {
+					if occupied.FamilyID == msg.FamilyID && occupied.CheckOut != true {
+						d.occupied[msg.Level], occupied = storage.RemoveReside(d.occupied[msg.Level], i)
+						break
+					}
+				}
 				switch recv.Reason {
-				case HAVEONEHOUSE:
+				case HAVEONEHOUSE, FAMILYDONOTEXIST:
 					occupied.FamilyID = 0
 					d.vacant[msg.Level] = append(d.vacant[msg.Level], occupied)
 				case HOUSEMATCHED, HOUSEDONOTEXIST:
@@ -158,19 +170,19 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 					ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
 				}
 			default:
-				log.Print("Received unexpected response: %#v", res)
+				log.Print("Distributor: Received unexpected response, ", res)
 			}
 		})
 	case *distributorMessages.MatchEmptyHouse:
 		if len(d.vacant[msg.Request.Level]) != 0 {
 			var vacant storage.Reside
-			if msg.Retry != -1 {
-				vacant = d.occupied[msg.Request.Level][int(msg.Retry)]
+			if msg.Request.Retry != -1 {
+				vacant = d.occupied[msg.Request.Level][int(msg.Request.Retry)]
 			} else {
 				d.vacant[msg.Request.Level], vacant = storage.RemoveReside(d.vacant[msg.Request.Level], len(d.vacant[msg.Request.Level])-1)
 				vacant.FamilyID = msg.Request.FamilyID
 				d.occupied[msg.Request.Level] = append(d.occupied[msg.Request.Level], vacant)
-				msg.Retry = int32(len(d.occupied[msg.Request.Level]))
+				msg.Request.Retry = int32(len(d.occupied[msg.Request.Level]) - 1)
 			}
 			// 发给 manager
 			future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseMatch{FamilyID: vacant.FamilyID, HouseID: vacant.HouseID}, 2000*time.Millisecond)
@@ -182,26 +194,31 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 
 				switch res.(type) {
 				case *managerMessages.HouseMatchACK:
-					log.Print("Received HouseMatch ACK")
+					log.Print("Distributor: Received HouseMatch ACK")
 				case *managerMessages.HouseMatchReject:
 					recv := res.(*managerMessages.HouseMatchReject)
 					var occupied storage.Reside
-					d.occupied[msg.Request.Level], occupied = storage.RemoveReside(d.occupied[msg.Request.Level], int(msg.Retry))
+					for i, occupied := range d.occupied[msg.Request.Level] {
+						if occupied.FamilyID == msg.Request.FamilyID && occupied.CheckOut != true {
+							d.occupied[msg.Request.Level], occupied = storage.RemoveReside(d.occupied[msg.Request.Level], i)
+							break
+						}
+					}
 					switch recv.Reason {
-					case HAVEONEHOUSE:
+					case HAVEONEHOUSE, FAMILYDONOTEXIST:
 						occupied.FamilyID = 0
 						d.vacant[msg.Request.Level] = append(d.vacant[msg.Request.Level], occupied)
 					case HOUSEMATCHED, HOUSEDONOTEXIST:
-						msg.Retry = -1
+						msg.Request.Retry = -1
 						ctx.Self().Tell(msg)
 					}
 				default:
-					log.Print("Received unexpected response: %#v", res)
+					log.Print("Distributor: Received unexpected response, ", res)
 				}
 			})
 			return
 		}
-		ctx.Request(d.verifierPID, &distributorMessages.HouseApplicationReject{Request: msg.Request, Reason: "对不起，一户家庭不能租住超过一套保障房"})
+		ctx.Request(d.verifierPID, &distributorMessages.HouseApplicationReject{Request: msg.Request, Reason: "对不起，系统中暂时没有匹配房源"})
 	default:
 		fmt.Printf("%+v\n", msg)
 	}

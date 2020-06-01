@@ -35,7 +35,7 @@ CREATE TABLE house (
 	age INT NOT NULL,
 	area INT NOT NULL,
 	level INT NOT NULL,
-    deleted bool DEFAULT FALSE NOT NULL,
+	deleted bool DEFAULT FALSE NOT NULL,
 );
 
 CREATE TABLE family (
@@ -47,7 +47,7 @@ CREATE TABLE family (
 CREATE TABLE reside (
 	house_id INT NOT NULL,
 	family_id INT NOT NULL,
-    checkout bool DEFAULT FALSE NOT NULL,
+	checkout bool DEFAULT FALSE NOT NULL,
 	FOREIGN KEY (house_id) REFERENCES house(id) ON DELETE CASCADE,
 	FOREIGN KEY (family_id) REFERENCES family(id) ON DELETE CASCADE,
 	PRIMARY KEY (house_id, family_id)

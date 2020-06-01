@@ -5,26 +5,10 @@ option go_package = "Reactive-Welfare-Housing-System/src/messages/propertyMessag
 
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 
-message ExaminedHouse {
-    int32 ID = 1;
-    int32 Level = 2;
-    int32 Age = 3;
-    int32 Area = 4;
-}
-
-message ExaminedHouses {
-    repeated ExaminedHouse Houses = 1;
-}
-
-message ExaminationReject {
-    ExaminedHouse House = 1;
-    int32 FamilyID = 2;
-}
-
 message ExaminationACK {
     
 }
 
 message ExaminationRejects {
-    repeated ExaminationReject Houses = 1;
+    repeated int32 HouseID = 1;
 }

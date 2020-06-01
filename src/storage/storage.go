@@ -21,7 +21,13 @@ type House struct {
 
 type Family struct {
 	ID     int32
+	Level  int32
 	Income int32
+}
+
+type FamilyCheckOut struct {
+	FamilyID int32
+	Level    int32
 }
 
 type Reside struct {
@@ -67,7 +73,8 @@ type HouseSystem interface {
 	BatchInsertHouse(records []House) []int
 	InsertMatch(reside Reside) (MatchResponse, error)
 	CheckOutHouse(reside Reside) error
-	QueryHouse(HouseID []int32) []Reside
+	QueryReside(HouseID []int32) []Reside
+	QueryHouse(HouseID []int32) []House
 	SignedDeleteHouse(HouseID []int32) error
 	DeleteHouse(HouseID []int32) error
 	DeleteReside(reside Reside)
@@ -107,12 +114,12 @@ func (db *DB) SignedDeleteHouse(HouseID []int32) error {
 	return err
 }
 
-func (db *DB) QueryHouse(HouseID []int32) []Reside {
+func (db *DB) QueryReside(HouseID []int32) []Reside {
 	args := make([]interface{}, len(HouseID))
 	for i, id := range HouseID {
 		args[i] = id
 	}
-	stmt := `SELECT H.id, H.age, H.area, H.level, R.family_id FROM (SELECT * FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `) AND deleted = false) AS H
+	stmt := `SELECT H.id, H.age, H.area, H.level, R.family_id FROM (SELECT * FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `)) AS H
 	 LEFT JOIN (SELECT * FROM reside WHERE checkout = false) AS R ON H.id = R.house_id`
 	rows, err := db.Query(stmt, args...)
 	if err != nil {
@@ -134,6 +141,28 @@ func (db *DB) QueryHouse(HouseID []int32) []Reside {
 	return examined
 }
 
+func (db *DB) QueryHouse(HouseID []int32) []House {
+	args := make([]interface{}, len(HouseID))
+	for i, id := range HouseID {
+		args[i] = id
+	}
+	stmt := `SELECT id, age, area, level FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `) AND deleted = false`
+	rows, err := db.Query(stmt, args...)
+	if err != nil {
+		fmt.Println("QueryHouse error: ", err)
+	}
+	var examined []House
+
+	for rows.Next() {
+		var house House
+		if err := rows.Scan(&house.ID, &house.Age, &house.Area, &house.Level); err != nil {
+			log.Panic(err)
+		}
+		examined = append(examined, House{ID: house.ID, Area: house.Area, Age: house.Age, Level: house.Level})
+	}
+	return examined
+}
+
 func (db *DB) InsertMatch(reside Reside) (MatchResponse, error) {
 	tx, _ := db.Begin()
 	var id int32
@@ -145,7 +174,7 @@ func (db *DB) InsertMatch(reside Reside) (MatchResponse, error) {
 						LEFT JOIN (SELECT * FROM reside WHERE checkout = false) AS R ON H.id = R.house_id
 						UNION
 						SELECT H.id, R.family_id FROM (SELECT * FROM house where deleted = false) as H
-						RIGHT JOIN (SELECT * FROM reside WHERE family_id = ? AND checkout = false) AS R ON H.id = R.house_id`, reside.HouseID, reside.FamilyID, reside.HouseID, reside.FamilyID)
+						RIGHT JOIN (SELECT * FROM reside WHERE family_id = ? AND checkout = false) AS R ON H.id = R.house_id`, reside.HouseID, reside.FamilyID)
 
 	var res MatchResponse
 	for rows.Next() {
