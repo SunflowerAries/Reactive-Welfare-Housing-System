@@ -30,6 +30,14 @@ func (m *managerActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
 		m.propertyPID = ctx.Spawn(router.NewRoundRobinPool(5).WithProducer(property.NewPropertyActor(m.db, ctx.Self())))
+		checkouts := m.db.ClearHouse()
+		var resides []*managerMessages.ExaminationReject
+		for _, checkout := range checkouts {
+			resides = append(resides, &managerMessages.ExaminationReject{HouseID: checkout.HouseID, FamilyID: checkout.FamilyID})
+		}
+		if len(resides) != 0 {
+			ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
+		}
 	case *sharedMessages.NewHouses:
 		var houses []storage.House
 		for _, house := range msg.Houses {
@@ -138,7 +146,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				log.Print("Manager: Checkout house failed ", err)
 				return
 			}
-			ctx.Respond(&managerMessages.HouseCheckOutACK{})
+			ctx.Respond(&managerMessages.HouseCheckOutACK{HouseID: msg.HouseID})
 		}
 		future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseCheckOut{CheckOut: msg}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {

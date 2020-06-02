@@ -78,6 +78,7 @@ type HouseSystem interface {
 	SignedDeleteHouse(HouseID []int32) error
 	DeleteHouse(HouseID []int32) error
 	DeleteReside(reside Reside)
+	ClearHouse() []Reside
 }
 
 type DB struct {
@@ -88,6 +89,24 @@ func RemoveReside(s []Reside, i int) ([]Reside, Reside) {
 	var val Reside = s[i]
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1], val
+}
+
+func (db *DB) ClearHouse() []Reside {
+	_, err := db.Exec(`DELETE FROM house WHERE deleted = true`)
+	if err != nil {
+		fmt.Println("Delete House Error, ", err)
+	}
+	rows, err := db.Query(`SELECT house_id, family_id FROM reside WHERE checkout = true`)
+	db.Exec(`DELETE FROM reside WHERE checkout = true`)
+	var checkouted []Reside
+	for rows.Next() {
+		var reside Reside
+		if err := rows.Scan(&reside.HouseID, &reside.FamilyID); err != nil {
+			log.Print(err)
+		}
+		checkouted = append(checkouted, reside)
+	}
+	return checkouted
 }
 
 func (db *DB) DeleteHouse(HouseID []int32) error {

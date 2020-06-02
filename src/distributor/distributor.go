@@ -15,7 +15,7 @@ import (
 
 type distributorActor struct {
 	db          storage.HouseSystem
-	occupied    [storage.HouseLevel + 1][]storage.Reside
+	occupied    [storage.HouseLevel + 1]map[int32][]storage.Reside
 	vacant      [storage.HouseLevel + 1][]storage.Reside
 	managerPID  *actor.PID
 	verifierPID *actor.PID
@@ -29,11 +29,18 @@ const FAMILYDONOTEXIST = 4
 func (d *distributorActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
-		d.occupied, d.vacant = d.db.InitMatchCache()
-		for index := range d.occupied {
+		for i := 1; i < 4; i++ {
+			d.occupied[i] = make(map[int32][]storage.Reside)
+		}
+		var occupieds [storage.HouseLevel + 1][]storage.Reside
+
+		occupieds, d.vacant = d.db.InitMatchCache()
+
+		for index := range occupieds {
 			fmt.Printf("Occupied Level: %d\n", index)
 			fmt.Println("HouseID\tFamilyID")
-			for _, occupied := range d.occupied[index] {
+			for _, occupied := range occupieds[index] {
+				d.occupied[index][occupied.FamilyID] = append(d.occupied[index][occupied.FamilyID], storage.Reside{HouseID: occupied.HouseID, FamilyID: occupied.FamilyID, Level: occupied.Level, CheckOut: false})
 				fmt.Printf("%d\t%d\n", occupied.HouseID, occupied.FamilyID)
 			}
 		}
@@ -65,9 +72,9 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 		// 一次处理一条过于低效，需要优化
 		for _, deleted := range msg.Houses {
 			if deleted.FamilyID != 0 {
-				for index, occupied := range d.occupied[deleted.Level] {
-					if occupied.HouseID == deleted.HouseID && occupied.FamilyID == deleted.FamilyID {
-						d.occupied[deleted.Level], _ = storage.RemoveReside(d.occupied[deleted.Level], index)
+				for index, occupied := range d.occupied[deleted.Level][deleted.FamilyID] {
+					if occupied.HouseID == deleted.HouseID && occupied.CheckOut != true {
+						d.occupied[deleted.Level][deleted.FamilyID], _ = storage.RemoveReside(d.occupied[deleted.Level][deleted.FamilyID], index)
 						break
 					}
 				}
@@ -82,112 +89,92 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 		}
 		ctx.Respond(&distributorMessages.UnqualifiedHousesACK{})
 	case *verifierMessages.HouseCheckOut:
-		var index = -1
-		if msg.Retry != -1 {
-			index = int(msg.Retry)
-		} else {
-			for i, occupied := range d.occupied[msg.Level] {
-				if occupied.FamilyID == msg.FamilyID {
-					if occupied.CheckOut != true {
-						occupied.CheckOut = true
-						d.vacant[msg.Level] = append(d.vacant[msg.Level], storage.Reside{HouseID: occupied.HouseID, Level: msg.Level})
-					}
-					index = i
-					break
+		ctx.Respond(&distributorMessages.HouseCheckOutACK{})
+		for _, occupied := range d.occupied[msg.Level][msg.FamilyID] {
+			if occupied.CheckOut != true {
+				occupied.CheckOut = true
+				d.vacant[msg.Level] = append(d.vacant[msg.Level], storage.Reside{HouseID: occupied.HouseID, Level: msg.Level})
+			}
+			future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseCheckOut{FamilyID: occupied.FamilyID, HouseID: occupied.HouseID}, 2000*time.Millisecond)
+			ctx.AwaitFuture(future, func(res interface{}, err error) {
+				if err != nil {
+					ctx.Self().Tell(msg)
+					return
 				}
-			}
-			// Choice: No Reside or ACK
-			ctx.Respond(&distributorMessages.HouseCheckOutACK{})
-		}
 
-		if index == -1 {
-			return
-		}
-		future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseCheckOut{FamilyID: d.occupied[msg.Level][index].FamilyID, HouseID: d.occupied[msg.Level][index].HouseID}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				msg.Retry = int32(index)
-				ctx.Self().Tell(msg)
-				return
-			}
-
-			switch res.(type) {
-			case *managerMessages.HouseCheckOutACK:
-				for i, occupied := range d.occupied[msg.Level] {
-					if occupied.FamilyID == msg.FamilyID && occupied.CheckOut != true {
-						d.occupied[msg.Level], _ = storage.RemoveReside(d.occupied[msg.Level], i)
-						break
+				switch res.(type) {
+				case *managerMessages.HouseCheckOutACK:
+					recv := res.(*managerMessages.HouseCheckOutACK)
+					for i, occupy := range d.occupied[msg.Level][msg.FamilyID] {
+						if occupy.HouseID == recv.HouseID {
+							d.occupied[msg.Level][msg.FamilyID], _ = storage.RemoveReside(d.occupied[msg.Level][msg.FamilyID], i)
+							break
+						}
 					}
+					log.Print("Distributor: Received HouseCheckOut ACK")
+				default:
+					log.Print("Distributor: Received unexpected response, ", res)
 				}
-				log.Print("Distributor: Received HouseCheckOut ACK")
-			default:
-				log.Print("Distributor: Received unexpected response, ", res)
-			}
-		})
+			})
+		}
 	case *verifierMessages.HouseApplicationRequest:
-		var index = -1
-		if msg.Retry != -1 {
-			index = int(msg.Retry)
-		} else {
-			for i, occupied := range d.occupied[msg.Level] {
-				if occupied.FamilyID == msg.FamilyID && occupied.CheckOut != true {
-					index = i
-					break
-				}
-			}
+		if msg.Retry != true {
 			ctx.Respond(&distributorMessages.HouseApplicationACK{})
-			msg.Retry = int32(index)
 		}
-		if index == -1 {
-			ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
-			return
-		}
-		future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseMatch{FamilyID: d.occupied[msg.Level][index].FamilyID, HouseID: d.occupied[msg.Level][index].HouseID}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
+		for _, occupied := range d.occupied[msg.Level][msg.FamilyID] {
+			if occupied.CheckOut != true {
+				future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseMatch{FamilyID: occupied.FamilyID, HouseID: occupied.HouseID}, 2000*time.Millisecond)
+				ctx.AwaitFuture(future, func(res interface{}, err error) {
+					if err != nil {
+						msg.Retry = true
+						ctx.Self().Tell(msg)
+						return
+					}
+
+					switch res.(type) {
+					case *managerMessages.HouseMatchACK:
+						log.Print("Distributor: Received HouseMatch ACK")
+					case *managerMessages.HouseMatchReject:
+						recv := res.(*managerMessages.HouseMatchReject)
+						var occupied storage.Reside
+						var i int
+						for i, occupied = range d.occupied[msg.Level][msg.FamilyID] {
+							if occupied.CheckOut != true {
+								d.occupied[msg.Level][msg.FamilyID], occupied = storage.RemoveReside(d.occupied[msg.Level][msg.FamilyID], i)
+								break
+							}
+						}
+						switch recv.Reason {
+						case HAVEONEHOUSE, FAMILYDONOTEXIST:
+							occupied.FamilyID = 0
+							d.vacant[msg.Level] = append(d.vacant[msg.Level], occupied)
+						case HOUSEMATCHED, HOUSEDONOTEXIST:
+							msg.Retry = false
+							ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
+						}
+					default:
+						log.Print("Distributor: Received unexpected response, ", res)
+					}
+				})
 				return
 			}
-
-			switch res.(type) {
-			case *managerMessages.HouseMatchACK:
-				log.Print("Distributor: Received HouseMatch ACK")
-			case *managerMessages.HouseMatchReject:
-				recv := res.(*managerMessages.HouseMatchReject)
-				var occupied storage.Reside
-				for i, occupied := range d.occupied[msg.Level] {
-					if occupied.FamilyID == msg.FamilyID && occupied.CheckOut != true {
-						d.occupied[msg.Level], occupied = storage.RemoveReside(d.occupied[msg.Level], i)
-						break
-					}
-				}
-				switch recv.Reason {
-				case HAVEONEHOUSE, FAMILYDONOTEXIST:
-					occupied.FamilyID = 0
-					d.vacant[msg.Level] = append(d.vacant[msg.Level], occupied)
-				case HOUSEMATCHED, HOUSEDONOTEXIST:
-					msg.Retry = -1
-					ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
-				}
-			default:
-				log.Print("Distributor: Received unexpected response, ", res)
-			}
-		})
+		}
+		ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
 	case *distributorMessages.MatchEmptyHouse:
 		if len(d.vacant[msg.Request.Level]) != 0 {
 			var vacant storage.Reside
-			if msg.Request.Retry != -1 {
-				vacant = d.occupied[msg.Request.Level][int(msg.Request.Retry)]
-			} else {
+			if msg.Request.Retry != true {
 				d.vacant[msg.Request.Level], vacant = storage.RemoveReside(d.vacant[msg.Request.Level], len(d.vacant[msg.Request.Level])-1)
 				vacant.FamilyID = msg.Request.FamilyID
-				d.occupied[msg.Request.Level] = append(d.occupied[msg.Request.Level], vacant)
-				msg.Request.Retry = int32(len(d.occupied[msg.Request.Level]) - 1)
+				d.occupied[msg.Request.Level][msg.Request.FamilyID] = append(d.occupied[msg.Request.Level][msg.Request.FamilyID], vacant)
+			} else {
+				vacant = d.occupied[msg.Request.Level][msg.Request.FamilyID][len(d.occupied[msg.Request.Level][msg.Request.FamilyID])-1]
 			}
 			// 发给 manager
 			future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseMatch{FamilyID: vacant.FamilyID, HouseID: vacant.HouseID}, 2000*time.Millisecond)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				if err != nil {
+					msg.Request.Retry = true
 					ctx.Self().Tell(msg)
 					return
 				}
@@ -198,9 +185,9 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 				case *managerMessages.HouseMatchReject:
 					recv := res.(*managerMessages.HouseMatchReject)
 					var occupied storage.Reside
-					for i, occupied := range d.occupied[msg.Request.Level] {
-						if occupied.FamilyID == msg.Request.FamilyID && occupied.CheckOut != true {
-							d.occupied[msg.Request.Level], occupied = storage.RemoveReside(d.occupied[msg.Request.Level], i)
+					for i, occupied := range d.occupied[msg.Request.Level][msg.Request.FamilyID] {
+						if occupied.CheckOut != true {
+							d.occupied[msg.Request.Level][msg.Request.FamilyID], occupied = storage.RemoveReside(d.occupied[msg.Request.Level][msg.Request.FamilyID], i)
 							break
 						}
 					}
@@ -209,7 +196,7 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 						occupied.FamilyID = 0
 						d.vacant[msg.Request.Level] = append(d.vacant[msg.Request.Level], occupied)
 					case HOUSEMATCHED, HOUSEDONOTEXIST:
-						msg.Request.Retry = -1
+						msg.Request.Retry = false
 						ctx.Self().Tell(msg)
 					}
 				default:

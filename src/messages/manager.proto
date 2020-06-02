@@ -30,7 +30,7 @@ message HouseMatchACK {
 }
 
 message HouseCheckOutACK {
-    
+    int32 HouseID = 1;
 }
 
 message ExaminationReject {

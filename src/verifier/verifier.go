@@ -40,7 +40,7 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		v.distributorPID = msg.Sender
 		ctx.Send(v.distributorPID, &sharedMessages.VerifierConnect{Sender: ctx.Self()})
 	case *sharedMessages.NewRequest:
-		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseApplicationRequest{FamilyID: msg.FamilyID, Level: msg.Level, Retry: -1}, 2000*time.Millisecond)
+		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseApplicationRequest{FamilyID: msg.FamilyID, Level: msg.Level, Retry: false}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				ctx.Self().Tell(msg)
@@ -52,7 +52,7 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 			case *distributorMessages.HouseApplicationReject:
 				log.Print("Verifier: Received HouseApplication Reject, ", res.(*distributorMessages.HouseApplicationReject).Reason)
 			default:
-				log.Print("Verifier: Received unexpected response, ", res)
+				log.Print("Verifier: Request Received unexpected response, ", res)
 			}
 		})
 	case *sharedMessages.NewRequests:
@@ -60,7 +60,7 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 			ctx.Self().Tell(request)
 		}
 	case *sharedMessages.NewCheckOut:
-		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseCheckOut{FamilyID: msg.FamilyID, Level: msg.Level, Retry: -1}, 2000*time.Millisecond)
+		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseCheckOut{FamilyID: msg.FamilyID, Level: msg.Level, Retry: false}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				ctx.Self().Tell(msg)
@@ -70,7 +70,7 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 			case *distributorMessages.HouseCheckOutACK:
 				log.Print("Verifier: Received HouseCheckOut ACK")
 			default:
-				log.Print("Verifier: Received unexpected response, ", res)
+				log.Print("Verifier: CheckOut Received unexpected response, ", res)
 			}
 		})
 	case *sharedMessages.NewCheckOuts:
