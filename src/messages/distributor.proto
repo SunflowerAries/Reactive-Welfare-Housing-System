@@ -21,6 +21,7 @@ message HouseApplicationACK {
 
 message MatchEmptyHouse {
     verifier.HouseApplicationRequest Request = 1;
+    actor.PID Sender = 2;
 }
 
 message HouseCheckOutResponse {

@@ -92,9 +92,9 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		})
 	case *distributorMessages.HouseMatch:
 		ret, err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
+		var reason int32
 		if err != nil || (!ret.FamilyOwnHouse && !ret.Success) {
-			log.Print("Manager: Insert house failed, ", err, ret)
-			var reason int32
+			log.Print("Manager: Insert house failed, ", err)
 			if ret.HouseMatched {
 				reason = distributor.HOUSEMATCHED
 			} else if err == sql.ErrNoRows {
@@ -102,10 +102,8 @@ func (m *managerActor) Receive(ctx actor.Context) {
 			} else {
 				reason = distributor.FAMILYDONOTEXIST
 			}
-			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg, Reason: reason})
-			return
 		}
-		if ret.Success {
+		if ret.Success && err == nil {
 			ctx.Respond(&managerMessages.HouseMatchACK{})
 			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchApprove{Match: msg}, 2000*time.Millisecond)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
@@ -121,11 +119,8 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				}
 			})
 		} else {
-			if ret.FamilyOwnHouse != true {
-				log.Print(ret)
-			}
-			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg, Reason: distributor.HAVEONEHOUSE})
-			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchReject{Match: msg, Reason: distributor.HAVEONEHOUSE}, 2000*time.Millisecond)
+			ctx.Respond(&managerMessages.HouseMatchReject{Match: msg, Reason: reason})
+			future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseMatchReject{Match: msg, Reason: reason}, 2000*time.Millisecond)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				if err != nil {
 					ctx.Self().Tell(msg)

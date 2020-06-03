@@ -122,6 +122,7 @@ func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
 		// fmt.Fprintf(w, "Not Implement\n")
 		// Do something with GET URL
 	case "POST":
+		fmt.Print("In house")
 		// https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
 		decoder := json.NewDecoder(req.Body)
 		decoder.DisallowUnknownFields()
