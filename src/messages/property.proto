@@ -1,0 +1,14 @@
+syntax = "proto3";
+package property;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/propertyMessages";
+
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+
+message ExaminationACK {
+    
+}
+
+message ExaminationRejects {
+    repeated int32 HouseID = 1;
+}
