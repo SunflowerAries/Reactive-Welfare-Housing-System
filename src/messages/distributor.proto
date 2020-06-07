@@ -1,0 +1,49 @@
+syntax = "proto3";
+package distributor;
+
+option go_package = "Reactive-Welfare-Housing-System/src/messages/distributorMessages";
+
+import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "Reactive-Welfare-Housing-System/src/messages/verifier.proto";
+
+message HouseApplicationReject {
+    verifier.HouseApplicationRequest Request = 1;
+    string Reason = 2;
+}
+
+message NewHousesACK {
+    
+}
+
+message HouseApplicationACK {
+
+}
+
+message MatchEmptyHouse {
+    verifier.HouseApplicationRequest Request = 1;
+    actor.PID Sender = 2;
+}
+
+message HouseCheckOutResponse {
+    string Answer = 1;
+}
+
+message HouseCheckOut {
+    int32 FamilyID = 1;
+    int32 HouseID = 2;
+    bool Retry = 3;
+}
+
+message HouseCheckOutACK {
+
+}
+
+message UnqualifiedHousesACK {
+
+}
+
+message HouseMatch {
+    int32 FamilyID = 1;
+    int32 HouseID = 2;
+    int32 Level = 3;
+}
