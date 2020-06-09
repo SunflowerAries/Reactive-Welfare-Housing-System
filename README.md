@@ -23,7 +23,7 @@ GRANT all privileges on *.* to 'housing'@'localhost';
 需要手动创建一个 `mysql` 的数据库
 
 ```sql
-create database housing
+create database housing;
 ```
 
 并在数据库中创建表：
@@ -35,7 +35,7 @@ CREATE TABLE house (
 	age INT NOT NULL,
 	area INT NOT NULL,
 	level INT NOT NULL,
-	deleted bool DEFAULT FALSE NOT NULL,
+	deleted bool DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE family (

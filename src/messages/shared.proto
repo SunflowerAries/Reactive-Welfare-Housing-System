@@ -3,7 +3,7 @@ package shared;
 
 option go_package = "Reactive-Welfare-Housing-System/src/messages/sharedMessages";
 
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "github.com/ChaokunChang/protoactor-go/actor/protos.proto";
 
 message NewHouses {
     repeated NewHouse Houses = 1;

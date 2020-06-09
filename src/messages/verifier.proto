@@ -3,7 +3,7 @@ package verifier;
 
 option go_package = "Reactive-Welfare-Housing-System/src/messages/verifierMessages";
 
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "github.com/ChaokunChang/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/tenant.proto";
 
 message HouseApplicationRequest {

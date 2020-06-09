@@ -5,7 +5,7 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
 	"Reactive-Welfare-Housing-System/src/storage"
 
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/actor"
 )
 
 type propertyActor struct {

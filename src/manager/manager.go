@@ -15,8 +15,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/AsynkronIT/protoactor-go/actor"
-	"github.com/AsynkronIT/protoactor-go/router"
+	"github.com/ChaokunChang/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/router"
 )
 
 type managerActor struct {
@@ -38,6 +38,8 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		if len(resides) != 0 {
 			ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
 		}
+		m.verifierPID = actor.NewPID("127.0.0.1:9001", "Verifier")
+		m.distributorPID = actor.NewPID("127.0.0.1:9002", "Distributor")
 	case *sharedMessages.NewHouses:
 		var houses []storage.House
 		for _, house := range msg.Houses {
