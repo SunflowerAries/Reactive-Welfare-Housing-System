@@ -1,1 +1,17 @@
-[{"Level": 1, "Age": 6, "Area": 100}, {"Level": 2, "Age": 4, "Area": 70}, {"Level": 3, "Age": 1, "Area": 80}]
+[
+    {
+        "Level": 1,
+        "Age": 6,
+        "Area": 100
+    },
+    {
+        "Level": 2,
+        "Age": 4,
+        "Area": 70
+    },
+    {
+        "Level": 3,
+        "Age": 1,
+        "Area": 80
+    }
+]
