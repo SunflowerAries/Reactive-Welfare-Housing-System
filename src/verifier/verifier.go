@@ -20,7 +20,7 @@ type verifierActor struct {
 	shared.BaseActor
 	managerPID     *actor.PID
 	distributorPID *actor.PID
-	government     *actor.PID
+	governmentPID  *actor.PID
 }
 
 // Receive Receive function for Verifier Actor

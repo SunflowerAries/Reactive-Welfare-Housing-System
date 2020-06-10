@@ -4,6 +4,7 @@
 # export GOPATH=/path/to/go (e.g. /home/sunflower/go)
 # in out-of-your-project/
 # protoc -I=. -I=Reactive-Welfare-Housing-System/src/messages -I=$GOPATH/src --go_out=plugins=grpc:. Reactive-Welfare-Housing-System/src/messages/*.proto
+cd $RWHS_HOME/../
 protoc -I=. -I=Reactive-Welfare-Housing-System/src/messages -I=$GOPATH/src --gogoslick_out=plugins=grpc:. Reactive-Welfare-Housing-System/src/messages/government.proto
 protoc -I=. -I=Reactive-Welfare-Housing-System/src/messages -I=$GOPATH/src --gogoslick_out=plugins=grpc:. Reactive-Welfare-Housing-System/src/messages/property.proto
 protoc -I=. -I=Reactive-Welfare-Housing-System/src/messages -I=$GOPATH/src --gogoslick_out=plugins=grpc:. Reactive-Welfare-Housing-System/src/messages/tenant.proto

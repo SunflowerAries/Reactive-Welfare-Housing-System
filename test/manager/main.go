@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"net/http"
+	"encoding/json"
 
 	"github.com/ChaokunChang/protoactor-go/actor"
 	"github.com/ChaokunChang/protoactor-go/mailbox"
@@ -13,6 +15,7 @@ import (
 	"Reactive-Welfare-Housing-System/src/manager"
 	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/storage"
+	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 )
 
 type managerSupervisor struct {
@@ -37,8 +40,62 @@ func (state *managerSupervisor) Receive(ctx actor.Context) {
 			actor.PropsFromProducer(manager.NewManagerActor(db)).WithMailbox(mailbox.Unbounded()),
 			"Manager")
 		fmt.Println("Manager Started, PID:", state.manager)
+		http.HandleFunc("/houses", state.housesIndex)
+		http.HandleFunc("/houses/check", state.housescheckIndex)
+		http.ListenAndServe(":3000", nil)
 	default:
 		fmt.Printf("Unexpected message for ManagerSupervisor: %+v\n", msg)
+	}
+}
+
+
+func (state *managerSupervisor) housescheckIndex(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		decoder := json.NewDecoder(req.Body)
+		decoder.DisallowUnknownFields()
+		var checkids []int32
+		err := decoder.Decode(&checkids)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		if decoder.More() {
+			http.Error(w, "extraneous data after JSON object", http.StatusBadRequest)
+		}
+		// https://stackoverflow.com/questions/55381710/converting-internal-go-struct-array-to-protobuf-generated-pointer-array
+		rootContext.Request(state.manager, &sharedMessages.ExaminationList{HouseID: checkids})
+		// distributor.
+		// Do something with POST URL
+		// messages.
+	}
+}
+
+func (state *managerSupervisor) housesIndex(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		// fmt.Fprintf(w, "Not Implement\n")
+		// Do something with GET URL
+	case "POST":
+		fmt.Print("In house")
+		// https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
+		decoder := json.NewDecoder(req.Body)
+		decoder.DisallowUnknownFields()
+		newhouse := []storage.House{}
+		err := decoder.Decode(&newhouse)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		if decoder.More() {
+			http.Error(w, "extraneous data after JSON object", http.StatusBadRequest)
+		}
+		// https://stackoverflow.com/questions/55381710/converting-internal-go-struct-array-to-protobuf-generated-pointer-array
+		houses := make([]*sharedMessages.NewHouse, len(newhouse))
+		for i, house := range newhouse {
+			houses[i] = &sharedMessages.NewHouse{Level: house.Level, Age: house.Age, Area: house.Area}
+		}
+		rootContext.Request(state.manager, &sharedMessages.NewHouses{Houses: houses})
+		// distributor.
+		// Do something with POST URL
+		// messages.
 	}
 }
 
