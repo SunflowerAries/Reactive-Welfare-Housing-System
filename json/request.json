@@ -1,1 +1,22 @@
-[{"Level": 1, "FamilyID": 8}, {"Level": 1, "FamilyID": 3}, {"Level": 1, "FamilyID": 6}, {"Level": 2, "FamilyID": 4}, {"Level": 2, "FamilyID": 2}]
+[
+    {
+        "Level": 1,
+        "FamilyID": 8
+    },
+    {
+        "Level": 1,
+        "FamilyID": 3
+    },
+    {
+        "Level": 1,
+        "FamilyID": 6
+    },
+    {
+        "Level": 2,
+        "FamilyID": 4
+    },
+    {
+        "Level": 2,
+        "FamilyID": 2
+    }
+]
