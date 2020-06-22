@@ -1,13 +1,13 @@
 package manager
 
 import (
-	"Reactive-Welfare-Housing-System/src/distributor"
 	"Reactive-Welfare-Housing-System/src/messages/distributorMessages"
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
 	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
 	"Reactive-Welfare-Housing-System/src/property"
+	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/storage"
 	"database/sql"
 	"fmt"
@@ -98,11 +98,11 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		if err != nil || (!ret.FamilyOwnHouse && !ret.Success) {
 			log.Print("Manager: Insert house failed, ", err)
 			if ret.HouseMatched {
-				reason = distributor.HOUSEMATCHED
+				reason = shared.HOUSEMATCHED
 			} else if err == sql.ErrNoRows {
-				reason = distributor.HOUSEDONOTEXIST
+				reason = shared.HOUSEDONOTEXIST
 			} else {
-				reason = distributor.FAMILYDONOTEXIST
+				reason = shared.FAMILYDONOTEXIST
 			}
 		}
 		if ret.Success && err == nil {

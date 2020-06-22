@@ -5,6 +5,7 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
+	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/storage"
 	"fmt"
 	"log"
@@ -20,11 +21,6 @@ type distributorActor struct {
 	managerPID  *actor.PID
 	verifierPID *actor.PID
 }
-
-const HAVEONEHOUSE = 1
-const HOUSEMATCHED = 2
-const HOUSEDONOTEXIST = 3
-const FAMILYDONOTEXIST = 4
 
 func (d *distributorActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
@@ -147,10 +143,10 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 							}
 						}
 						switch recv.Reason {
-						case HAVEONEHOUSE, FAMILYDONOTEXIST:
+						case shared.HAVEONEHOUSE, shared.FAMILYDONOTEXIST:
 							occupied.FamilyID = 0
 							d.vacant[msg.Level] = append(d.vacant[msg.Level], occupied)
-						case HOUSEMATCHED, HOUSEDONOTEXIST:
+						case shared.HOUSEMATCHED, shared.HOUSEDONOTEXIST:
 							msg.Retry = false
 							ctx.Self().Tell(&distributorMessages.MatchEmptyHouse{Request: msg})
 						}
@@ -208,10 +204,10 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 				}
 				log.Print("Distributor: Received HouseMatchReject With Reason, ", recv.Reason)
 				switch recv.Reason {
-				case HAVEONEHOUSE, FAMILYDONOTEXIST:
+				case shared.HAVEONEHOUSE, shared.FAMILYDONOTEXIST:
 					occupied.FamilyID = 0
 					d.vacant[msg.Request.Level] = append(d.vacant[msg.Request.Level], occupied)
-				case HOUSEMATCHED, HOUSEDONOTEXIST:
+				case shared.HOUSEMATCHED, shared.HOUSEDONOTEXIST:
 					msg.Request.Retry = false
 					ctx.Self().Tell(msg)
 				}
