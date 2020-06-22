@@ -1,17 +1,20 @@
 # Reactive-Welfare-Housing-System
 
-写代码前，请先简单了解一下 
+## Materials
 
 - [Go 的包管理](https://zhuanlan.zhihu.com/p/60703832)，目前可以通过 go install 将 go.mod 中的依赖包安装
 - [Go 的 sql1](http://go-database-sql.org/overview.html)，[Go 的 sql2](https://xuchao918.github.io/2019/06/13/Go%E6%93%8D%E4%BD%9CMySql%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%96%B9%E5%BC%8F/)
 - [Protobuf](https://juejin.im/post/5d81bb5cf265da03ae78ab7b) https://developers.google.com/protocol-buffers/docs/gotutorial
 - [博客文档](https://blog.oklahome.net/)
 
-## 参与开发
+## Build and Run
 
-需要手动安装 [protobuf](https://grpc.io/docs/quickstart/go/) 
+### Pre-requirements
+Install [protobuf](https://grpc.io/docs/quickstart/go/) manually.
 
-建议新建一个用户，方式为
+### Database Initilization
+
+1. Create a new user `housing` for this project
 
 ```sql
 -- 创建用户
@@ -20,13 +23,13 @@ CREATE USER 'housing'@'localhost' IDENTIFIED WITH mysql_native_password BY 'hous
 GRANT all privileges on *.* to 'housing'@'localhost';
 ```
 
-需要手动创建一个 `mysql` 的数据库
+2. Create a new database `housing` under the new user `housing`
 
 ```sql
-create database housing
+create database housing;
 ```
 
-并在数据库中创建表：
+3. Create required tables in the new database `housing`
 
 ```sql
 use housing
@@ -35,7 +38,7 @@ CREATE TABLE house (
 	age INT NOT NULL,
 	area INT NOT NULL,
 	level INT NOT NULL,
-	deleted bool DEFAULT FALSE NOT NULL,
+	deleted bool DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE family (
@@ -54,16 +57,92 @@ CREATE TABLE reside (
 );
 ```
 
+### Build
+
+1. Export an envorinment variable for this project.
+``` bash
+export RWHS_HOME=/path/to/reporoot
+cd $RWHS_HOME
+```
+
+2. Install/Update go packages that required by this project
+``` bash
+bash $RWHS_HOME/install.sh
+bash $RWHS_HOME/updateprotobuf.sh
+```
+
+3. [Option] Generate go-protobuf code
+``` bash
+bash $RWHS_HOME/scripts/proto_gen.sh
+```
+
+### Local Test
+1. Start 
+``` bash
+cd $RWHS_HOME
+go run main.go
+```
+
+2. Add new data into database `housing`
+``` bash
+for i in $(ls $RWHS_HOME/json | grep '.*\.json');
+do
+echo $i
+curl -X POST -H "Content-Type: application/json" -d @./$i http://localhost:3000/houses
+done
+```
+
+3. curl scripts
+``` bash
+curl -X POST -H "Content-Type: application/json" -d @$RWHS_HOME/json/houses\.json http://localhost:3000/houses
+
+curl -X POST -H "Content-Type: application/json" -d @$RWHS_HOME/json/check\.json http://localhost:3000/houses/check
+
+curl -X POST -H "Content-Type: application/json" -d @$RWHS_HOME/json/checkout\.json http://localhost:4000/users/checkout
+
+curl -X POST -H "Content-Type: application/json" -d @$RWHS_HOME/json/request\.json http://localhost:4000/users
+
+```	
+
+### Remote Test
+You will need 5 terminals now for this test.
+``` bash
+# terminal 1
+cd $RWHS_HOME/test/verifier
+go run main.go
+```
+``` bash
+# terminal 2
+cd $RWHS_HOME/test/distributor
+go run main.go
+```
+``` bash
+# terminal 3
+cd $RWHS_HOME/test/manager
+go run main.go
+```
+``` bash
+# terminal 4
+cd $RWHS_HOME/test/tenant
+go run main.go
+```
+``` bash
+# terminal 5
+cd $RWHS_HOME/scripts
+./remote_test.sh
+```
+
+
+### Contribution
+
+#### Before you started
 为了便于开发维护，建议开发每个新的功能点时都新建分支。
-
-### 写代码之前
-
 - 无论你现在在哪个分支，先切换到 `master` 分支 `git checkout master`
 - 确保你的本地代码是最新的 `git fetch origin` 然后 `git rebase origin/master`
 - 创建一个新的分支，分支名应该与你准备开发的内容有关，如 `git checkout -b update-readme-contributing` （**注意** 请尽量准确描述你工作的内容，并且在分支被合并后及时删除分支）
 - 在新的分支进行开发，并 `commit` 代码，`commit` 之前须 `git status` 确保不会提交不相关的文件
 
-### 提交代码之前
+#### Before you commit
 
 - 由于你开发期间 `master` 可能有过更新，所以请再确保 `git` 历史是最新的
   - 更新仓库 `git fetch origin`

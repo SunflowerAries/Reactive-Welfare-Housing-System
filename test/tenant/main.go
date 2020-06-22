@@ -1,58 +1,61 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"time"
+	"os"
 
-	console "github.com/AsynkronIT/goconsole"
-	"github.com/AsynkronIT/protoactor-go/actor"
-	"github.com/AsynkronIT/protoactor-go/remote"
+	"github.com/ChaokunChang/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/mailbox"
+	"github.com/ChaokunChang/protoactor-go/remote"
 
+	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/tenant"
-	// "Reactive-Welfare-Housing-System/src/shared"
+	// "Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 )
 
-type parentActor struct{}
-
-func newParentActor() actor.Actor {
-	return &parentActor{}
+type tenantSupervisor struct {
+	tenant *actor.PID
 }
 
-// func newChildActor() actor.Actor {
-// 	return &tenant.Actor{}
-// }
+func newTenantSupervisor() actor.Actor {
+	return &tenantSupervisor{}
+}
 
-func (state *parentActor) Receive(ctx actor.Context) {
+var rootContext = actor.EmptyRootContext
+
+func (state *tenantSupervisor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
+	case *actor.Started:
+		fmt.Println("TenantSupervisor Started, PID:", ctx.Self())
+		state.tenant, _ = rootContext.SpawnNamed(
+			actor.PropsFromProducer(tenant.NewTenantActor).WithMailbox(mailbox.Unbounded()),
+			"Tenant-0")
+		fmt.Println("Tenant-0 Started, PID:", state.tenant)
 	case *tenant.TriggerNewApplicationRequest:
-		timeout := 5 * time.Second
-		pidResp, _ := remote.SpawnNamed("127.0.0.1:9001", "Tenant-0", "Tenant", timeout)
-		child := pidResp.Pid
-		ctx.Send(child, msg)
-		// res, _ := actor.EmptyRootContext.RequestFuture(child, msg, timeout).Result()
-		// response := res.(*tenant.TriggerNewApplicationResponse)
-		// fmt.Printf("Response from remote %v", response.Message)
-
-		// pidResp2, _ := remote.SpawnNamed("127.0.0.1:9001", "Tenant-1", "Tenant", timeout)
-		// child2 := pidResp2.Pid
-		// ctx.Send(child2, msg)
+		ctx.Send(state.tenant, &tenant.TriggerNewApplicationRequest{})
+	default:
+		fmt.Printf("Unexpected message for TenantSupervisor: %+v\n", msg)
 	}
 }
 
 func main() {
-	// remote.Start("127.0.0.1:9000")
+	reader := bufio.NewReader(os.Stdin)
+	remote.Start("127.0.0.1:9000")
+
 	decider := func(reason interface{}) actor.Directive {
 		fmt.Println("handling failure for child")
 		return actor.StopDirective
 	}
 	supervisor := actor.NewOneForOneStrategy(10, 1000, decider)
-	rootContext := actor.EmptyRootContext
 	props := actor.
-		PropsFromProducer(newParentActor).
-		WithSupervisor(supervisor)
+		PropsFromProducer(newTenantSupervisor).
+		WithSupervisor(supervisor).
+		WithMailbox(mailbox.Unbounded())
 
-	pid := rootContext.Spawn(props)
+	pid, _ := rootContext.SpawnNamed(props, "TenantSupervisor")
 	rootContext.Send(pid, &tenant.TriggerNewApplicationRequest{})
 
-	console.ReadLine()
+	text, _ := reader.ReadString('\n')
+	shared.Use((text))
 }

@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/actor"
 )
 
 const HAVEONEHOUSE = 1

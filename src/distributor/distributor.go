@@ -11,7 +11,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/actor"
 )
 
 type distributorActor struct {
@@ -47,6 +47,8 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 			}
 			fmt.Printf("\n")
 		}
+		d.managerPID = actor.NewPID("127.0.0.1:9003", "Manager")
+		d.verifierPID = actor.NewPID("127.0.0.1:9001", "Verifier")
 	case *sharedMessages.VerifierConnect:
 		d.verifierPID = msg.Sender
 	case *sharedMessages.ManagerConnect:

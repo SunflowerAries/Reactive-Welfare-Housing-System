@@ -12,13 +12,13 @@ import (
 	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
 	"Reactive-Welfare-Housing-System/src/shared"
 
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/ChaokunChang/protoactor-go/actor"
 )
 
 // Actor The  Verifier Actor
 type verifierActor struct {
 	shared.BaseActor
-	mamagerPID     *actor.PID
+	managerPID     *actor.PID
 	distributorPID *actor.PID
 	governmentPID  *actor.PID
 }
@@ -26,20 +26,15 @@ type verifierActor struct {
 // Receive Receive function for Verifier Actor
 func (v *verifierActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
-	// case *actor.Started:
-	// 	fmt.Println("Verifier Starting, initialize actor here, PID:", ctx.Self())
-	// t.distributor = actor.NewPID("127.0.0.1:8081", "Distributor")
-	// t.government = actor.NewPID("127.0.0.1:8082", "Government")
-	// shared.Use(verifierActor)
-	// case *actor.Stopped:
-	// 	fmt.Println("Verifier Stopped, actor and its children are stopped")
-	// case *tenantMessage.HouseApplicationRequest:
-	// 	fmt.Println("Verifier Received a application from ", msg.UserName)
-	// 	ctx.Send(ctx.Sender(), &tenantMessage.HouseApplicationResponse{})
+	case *actor.Started:
+		v.distributorPID = actor.NewPID("127.0.0.1:9002", "Distributor")
+		v.managerPID = actor.NewPID("127.0.0.1:9003", "Manager")
+		fmt.Println("Verifier Starting, initialize actor here, PID:", ctx.Self())
 	case *sharedMessages.DistributorConnect:
 		v.distributorPID = msg.Sender
 		ctx.Send(v.distributorPID, &sharedMessages.VerifierConnect{Sender: ctx.Self()})
 	case *sharedMessages.NewRequest:
+		log.Print("Verifier: Got a new request: ", msg)
 		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseApplicationRequest{FamilyID: msg.FamilyID, Level: msg.Level, Retry: false}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
@@ -90,10 +85,11 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		log.Print("Verifier: Received UnqualifiedResides, ", msg.Resides)
 		ctx.Respond(&verifierMessages.UnqualifiedResidesACK{})
 	default:
-		fmt.Printf("%+v\n", msg)
+		fmt.Printf("Unexpected message for from %+v : %+v\n", ctx.Sender(), msg)
 	}
 }
 
+// NewVerifierActor Verifier Actor Helper
 func NewVerifierActor() actor.Producer {
 	return func() actor.Actor {
 		return &verifierActor{}

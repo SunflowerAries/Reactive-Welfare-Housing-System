@@ -3,7 +3,7 @@ package tenant;
 
 option go_package = "Reactive-Welfare-Housing-System/src/messages/tenantMessages";
 
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "github.com/ChaokunChang/protoactor-go/actor/protos.proto";
 
 message HouseApplicationRequest {
     int32 UserId = 1; // could be a ID Card Number

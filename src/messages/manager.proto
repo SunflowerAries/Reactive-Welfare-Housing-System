@@ -3,7 +3,7 @@ package manager;
 
 option go_package = "Reactive-Welfare-Housing-System/src/messages/managerMessages";
 
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "github.com/ChaokunChang/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/distributor.proto";
 import "Reactive-Welfare-Housing-System/src/messages/shared.proto";
 import "Reactive-Welfare-Housing-System/src/messages/property.proto";

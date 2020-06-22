@@ -3,7 +3,7 @@ package distributor;
 
 option go_package = "Reactive-Welfare-Housing-System/src/messages/distributorMessages";
 
-import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
+import "github.com/ChaokunChang/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/verifier.proto";
 
 message HouseApplicationReject {
