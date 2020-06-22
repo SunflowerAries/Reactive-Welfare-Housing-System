@@ -18,9 +18,9 @@ import (
 // Actor The  Verifier Actor
 type verifierActor struct {
 	shared.BaseActor
-	mamager        *actor.PID
+	mamagerPID     *actor.PID
 	distributorPID *actor.PID
-	government     *actor.PID
+	governmentPID  *actor.PID
 }
 
 // Receive Receive function for Verifier Actor
