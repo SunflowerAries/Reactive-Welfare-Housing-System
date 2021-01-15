@@ -1,12 +1,14 @@
 package distributor
 
 import (
+	"Reactive-Welfare-Housing-System/src/config"
 	"Reactive-Welfare-Housing-System/src/messages/distributorMessages"
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 	"Reactive-Welfare-Housing-System/src/messages/verifierMessages"
 	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/storage"
+	"Reactive-Welfare-Housing-System/src/utils"
 	"fmt"
 	"log"
 	"time"
@@ -15,69 +17,47 @@ import (
 )
 
 type distributorActor struct {
-	db          storage.HouseSystem
-	occupied    [storage.HouseLevel + 1]map[int32][]storage.Reside
-	vacant      [storage.HouseLevel + 1][]storage.Reside
-	managerPID  *actor.PID
-	verifierPID *actor.PID
+	db                  storage.HouseSystem
+	occupied            map[int32]storage.Reside
+	vacant              [config.HouseLevel + 1][]storage.Reside
+	managerPID          *actor.PID
+	verifierPID         *actor.PID
+	newhouseCommitIndex int
 }
 
 func (d *distributorActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
-		for i := 1; i < 4; i++ {
-			d.occupied[i] = make(map[int32][]storage.Reside)
-		}
-		var occupieds [storage.HouseLevel + 1][]storage.Reside
-
-		occupieds, d.vacant = d.db.InitMatchCache()
-
-		for index := range occupieds {
-			fmt.Printf("Occupied Level: %d\n", index)
-			fmt.Println("HouseID\tFamilyID")
-			for _, occupied := range occupieds[index] {
-				d.occupied[index][occupied.FamilyID] = append(d.occupied[index][occupied.FamilyID], storage.Reside{HouseID: occupied.HouseID, FamilyID: occupied.FamilyID, Level: occupied.Level, CheckOut: false})
-				fmt.Printf("%d\t%d\n", occupied.HouseID, occupied.FamilyID)
-			}
-		}
-		for index := range d.vacant {
-			fmt.Printf("Vacant Level: %d\n", index)
-			for _, vacant := range d.vacant[index] {
-				fmt.Printf("%d\t", vacant.HouseID)
-			}
-			fmt.Printf("\n")
-		}
+		d.occupied, d.vacant = d.db.InitMatchCache()
+		//for index := range d.vacant {
+		//	fmt.Printf("Vacant Level: %d\n", index)
+		//	for _, vacant := range d.vacant[index] {
+		//		fmt.Printf("%d\t", vacant.HouseID)
+		//	}
+		//	fmt.Printf("\n")
+		//}
 	case *sharedMessages.VerifierConnect:
 		d.verifierPID = msg.Sender
 	case *sharedMessages.ManagerConnect:
 		d.managerPID = msg.Sender
 		ctx.Send(d.managerPID, &sharedMessages.DistributorConnect{Sender: ctx.Self()})
 	case *managerMessages.NewHouses:
-		for _, vacant := range msg.Houses.Houses {
+		//log-based:include index in ack
+		pstart := d.newhouseCommitIndex - int(msg.CommitIndex)
+		for _, vacant := range msg.Houses.Houses[pstart:] {
 			d.vacant[vacant.Level] = append(d.vacant[vacant.Level], storage.Reside{HouseID: vacant.ID, Level: vacant.Level})
 		}
-		for i := 1; i < 4; i++ {
-			fmt.Printf("Vacant Level: %d\n", i)
-			for _, vacant := range d.vacant[i] {
-				fmt.Printf("%d\t", vacant.HouseID)
-			}
-			fmt.Printf("\n")
-		}
-		ctx.Respond(&distributorMessages.NewHousesACK{})
+		d.newhouseCommitIndex += len(msg.Houses.Houses) - pstart
+		ctx.Respond(&distributorMessages.NewHousesACK{CommitIndex: int32(d.newhouseCommitIndex)})
 	case *managerMessages.UnqualifiedHouses:
 		// 一次处理一条过于低效，需要优化
 		for _, deleted := range msg.Houses {
 			if deleted.FamilyID != 0 {
-				for index, occupied := range d.occupied[deleted.Level][deleted.FamilyID] {
-					if occupied.HouseID == deleted.HouseID && occupied.CheckOut != true {
-						d.occupied[deleted.Level][deleted.FamilyID], _ = storage.RemoveReside(d.occupied[deleted.Level][deleted.FamilyID], index)
-						break
-					}
-				}
+				delete(d.occupied, deleted.FamilyID)
 			} else {
 				for index, vacant := range d.vacant[deleted.Level] {
 					if vacant.HouseID == deleted.HouseID {
-						d.vacant[deleted.Level], _ = storage.RemoveReside(d.vacant[deleted.Level], index)
+						d.vacant[deleted.Level], _ = utils.RemoveReside(d.vacant[deleted.Level], index)
 						break
 					}
 				}
@@ -86,18 +66,19 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 		ctx.Respond(&distributorMessages.UnqualifiedHousesACK{})
 	case *verifierMessages.HouseCheckOut:
 		ctx.Respond(&distributorMessages.HouseCheckOutACK{})
-		for _, occupied := range d.occupied[msg.Level][msg.FamilyID] {
-			if occupied.CheckOut != true {
-				occupied.CheckOut = true
-				d.vacant[msg.Level] = append(d.vacant[msg.Level], storage.Reside{HouseID: occupied.HouseID, Level: msg.Level})
-			}
-			future := ctx.RequestFuture(d.managerPID, &distributorMessages.HouseCheckOut{FamilyID: occupied.FamilyID, HouseID: occupied.HouseID}, 2000*time.Millisecond)
-			ctx.AwaitFuture(future, func(res interface{}, err error) {
-				if err != nil {
-					ctx.Self().Tell(msg)
-					return
-				}
+		if reside, ok := d.occupied[msg.FamilyID]; ok {
+			delete(d.occupied, msg.FamilyID)
+			d.vacant[reside.Level] = append(d.vacant[reside.Level], reside)
+			//enter the queue
+			ctx.Request(d.managerPID, &distributorMessages.HouseCheckOut{FamilyID: reside.FamilyID, HouseID: reside.HouseID})
+		} else {
+			fmt.Printf("Family[%d] do not have any house.\n")
 
+		}
+
+		for _, occupied := range d.occupied[msg.Level][msg.FamilyID] {
+			future := ctx.RequestFuture(d.managerPID,, 2000*time.Millisecond)
+			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				switch res.(type) {
 				case *managerMessages.HouseCheckOutACK:
 					recv := res.(*managerMessages.HouseCheckOutACK)

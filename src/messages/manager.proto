@@ -23,6 +23,7 @@ message HouseMatchReject {
 
 message NewHouses {
     shared.NewHouses Houses = 1;
+    int32 CommitIndex = 2;
 }
 
 message HouseMatchACK {

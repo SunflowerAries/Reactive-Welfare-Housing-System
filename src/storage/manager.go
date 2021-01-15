@@ -9,10 +9,6 @@ import (
 )
 
 func (db *DB) ClearHouse() []Reside {
-	_, err := db.Exec(`DELETE FROM house WHERE deleted = true`)
-	if err != nil {
-		fmt.Println("Delete House Error, ", err)
-	}
 	rows, err := db.Query(`SELECT house_id, family_id FROM reside WHERE checkout = true`)
 	db.Exec(`DELETE FROM reside WHERE checkout = true`)
 	var checkouted []Reside
@@ -120,11 +116,11 @@ func (db *DB) CheckOutHouse(reside Reside) error {
 
 // https://medium.com/better-programming/how-to-bulk-create-and-update-the-right-way-in-golang-part-i-e15a8e5585d1
 
-func (db *DB) BatchInsertHouse(records []House) []int {
-	size := MAXARGS / 3
+func (db *DB) BatchInsertHouse(records []House) []BatchOPRes {
+	size := MAXARGS / HouseArgLens
 	tx, _ := db.Begin()
 	chunkList := funk.Chunk(records, size)
-	var HouseID []int
+	HouseID := []BatchOPRes{}
 	for _, chunk := range chunkList.([][]House) {
 		valueStrings := make([]string, 0, len(chunk))
 		valueArgs := make([]interface{}, 0, len(chunk)*3)
@@ -140,10 +136,10 @@ func (db *DB) BatchInsertHouse(records []House) []int {
 		if err != nil {
 			tx.Rollback()
 			fmt.Println(err)
+			break
 		} else {
 			id, _ := res.LastInsertId()
-			HouseID = append(HouseID, len(chunk))
-			HouseID = append(HouseID, int(id))
+			HouseID = append(HouseID, BatchOPRes{Idx: int(id), Length: len(chunk)})
 		}
 	}
 	err := tx.Commit()

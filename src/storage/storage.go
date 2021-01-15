@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	"Reactive-Welfare-Housing-System/src/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/thoas/go-funk"
 )
 
 // dependency injection with interface https://www.alexedwards.net/blog/organising-database-access
+const HouseArgLens = 3
 
 type House struct {
 	ID    int32
@@ -35,7 +37,6 @@ type Reside struct {
 	Level    int32
 	Age      int32
 	Area     int32
-	CheckOut bool
 }
 
 type NullableReside struct {
@@ -55,8 +56,6 @@ const (
 	DATABASE = "housing"
 )
 
-const HouseLevel = 3
-
 const MAXARGS = 65535
 
 const HouseArgs = "house.id, house.age, house.area, house.level"
@@ -67,9 +66,14 @@ type MatchResponse struct {
 	Success        bool
 }
 
+type BatchOPRes struct {
+	Idx    int
+	Length int
+}
+
 type HouseSystem interface {
-	InitMatchCache() ([HouseLevel + 1][]Reside, [HouseLevel + 1][]Reside)
-	BatchInsertHouse(records []House) []int
+	InitMatchCache() (map[int32]Reside, [config.HouseLevel + 1][]Reside)
+	BatchInsertHouse(records []House) []BatchOPRes
 	InsertMatch(reside Reside) (MatchResponse, error)
 	CheckOutHouse(reside Reside) error
 	QueryReside(HouseID []int32) []Reside
@@ -82,12 +86,6 @@ type HouseSystem interface {
 
 type DB struct {
 	*sql.DB
-}
-
-func RemoveReside(s []Reside, i int) ([]Reside, Reside) {
-	var val Reside = s[i]
-	s[i] = s[len(s)-1]
-	return s[:len(s)-1], val
 }
 
 func BatchInsertFamily(db *sql.DB, records []Family) {

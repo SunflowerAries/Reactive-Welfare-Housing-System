@@ -9,72 +9,80 @@ import (
 	"Reactive-Welfare-Housing-System/src/property"
 	"Reactive-Welfare-Housing-System/src/shared"
 	"Reactive-Welfare-Housing-System/src/storage"
+	"Reactive-Welfare-Housing-System/src/utils"
 	"database/sql"
 	"fmt"
+	"github.com/AsynkronIT/protoactor-go/mailbox"
 	"log"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
-	"github.com/AsynkronIT/protoactor-go/router"
 )
+
+type index struct {
+	idx int
+	mu  sync.Mutex
+}
+
+type newhouseLog struct {
+	log         []storage.House
+	commitIndex index
+}
 
 type managerActor struct {
 	db             storage.HouseSystem
 	distributorPID *actor.PID
 	propertyPID    *actor.PID
 	verifierPID    *actor.PID
+	newhousesLog   newhouseLog
 }
 
 func (m *managerActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
-		m.propertyPID = ctx.Spawn(router.NewRoundRobinPool(5).WithProducer(property.NewPropertyActor(m.db, ctx.Self())))
-		checkouts := m.db.ClearHouse()
-		var resides []*managerMessages.ExaminationReject
-		for _, checkout := range checkouts {
-			resides = append(resides, &managerMessages.ExaminationReject{HouseID: checkout.HouseID, FamilyID: checkout.FamilyID})
-		}
-		if len(resides) != 0 {
-			ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
-		}
+		m.propertyPID = ctx.Spawn(actor.PropsFromProducer(property.NewPropertyActor(m.db, ctx.Self())).WithMailbox(mailbox.Unbounded()))
+		//checkouts := m.db.ClearHouse()
+		//var resides []*managerMessages.ExaminationReject
+		//for _, checkout := range checkouts {
+		//	resides = append(resides, &managerMessages.ExaminationReject{houseID: checkout.houseID, FamilyID: checkout.FamilyID})
+		//}
+		//if len(resides) != 0 {
+		//	ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
+		//}
 	case *sharedMessages.NewHouses:
-		var houses []storage.House
+		pstart := len(m.newhousesLog.log)
 		for _, house := range msg.Houses {
-			houses = append(houses, storage.House{Level: house.Level, Age: house.Age, Area: house.Area})
+			m.newhousesLog.log = append(m.newhousesLog.log, storage.House{Level: house.Level, Age: house.Age, Area: house.Area})
 		}
-		HouseID := m.db.BatchInsertHouse(houses)
-		start := 0
-		for i := 0; i < len(HouseID)/2; i++ {
-			for j := 0; j < HouseID[2*i]; j++ {
-				houses[start+j].ID = int32(HouseID[2*i+1] + j)
+		go func(pstart int, length int) {
+			houseID := m.db.BatchInsertHouse(m.newhousesLog.log[pstart : pstart+length])
+			for i := 0; i < len(houseID); i++ {
+				for j := 0; j < houseID[i].Length; j++ {
+					m.newhousesLog.log[pstart+j].ID = int32(houseID[i].Idx + j)
+				}
+				pstart += houseID[i].Length
 			}
-			start += HouseID[2*i]
-		}
-		newhouses := make([]*sharedMessages.NewHouse, 0, len(msg.Houses))
-		for _, house := range houses {
-			newhouses = append(newhouses, &sharedMessages.NewHouse{ID: house.ID, Level: house.Level})
-		}
-		future := ctx.RequestFuture(m.distributorPID, &managerMessages.NewHouses{Houses: &sharedMessages.NewHouses{Houses: newhouses}}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-				return
+			m.newhousesLog.commitIndex.mu.Lock()
+			commitIndex := m.newhousesLog.commitIndex.idx
+			m.newhousesLog.commitIndex.mu.Unlock()
+			newhouses := make([]*sharedMessages.NewHouse, 0, len(m.newhousesLog.log)-commitIndex)
+			for _, house := range m.newhousesLog.log[commitIndex:] {
+				newhouses = append(newhouses, &sharedMessages.NewHouse{ID: house.ID, Level: house.Level})
 			}
-
-			switch res.(type) {
-			case *distributorMessages.NewHousesACK:
-				log.Print("Manager: Received Newhouse ACK")
-			default:
-				log.Print("Manager: Received unexpected response, ", res)
-			}
-		})
+			ctx.Request(m.distributorPID, &managerMessages.NewHouses{Houses: &sharedMessages.NewHouses{Houses: newhouses}, CommitIndex: int32(commitIndex)})
+		}(pstart, len(m.newhousesLog.log)-pstart)
+	case *distributorMessages.NewHousesACK:
+		m.newhousesLog.commitIndex.mu.Lock()
+		m.newhousesLog.commitIndex.idx = utils.Max(m.newhousesLog.commitIndex.idx, int(msg.CommitIndex))
+		m.newhousesLog.commitIndex.mu.Unlock()
 	case *sharedMessages.DistributorConnect:
 		m.distributorPID = msg.Sender
 	case *sharedMessages.VerifierConnect:
 		m.verifierPID = msg.Sender
 	case *sharedMessages.ExaminationList:
-		future := ctx.RequestFuture(m.propertyPID, &managerMessages.ExaminationList{HouseID: msg.HouseID}, 2000*time.Millisecond)
+		future := ctx.RequestFuture(m.propertyPID, &managerMessages.ExaminationList{houseID: msg.houseID}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				ctx.Self().Tell(msg)
@@ -91,7 +99,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 			}
 		})
 	case *distributorMessages.HouseMatch:
-		ret, err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
+		ret, err := m.db.InsertMatch(storage.Reside{houseID: msg.houseID, FamilyID: msg.FamilyID})
 		var reason int32
 		if err != nil || (!ret.FamilyOwnHouse && !ret.Success) {
 			log.Print("Manager: Insert house failed, ", err)
@@ -136,12 +144,12 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		}
 	case *distributorMessages.HouseCheckOut:
 		if msg.Retry != true {
-			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
+			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, houseID: msg.houseID})
 			if err != nil {
 				log.Print("Manager: Checkout house failed ", err)
 				return
 			}
-			ctx.Respond(&managerMessages.HouseCheckOutACK{HouseID: msg.HouseID})
+			ctx.Respond(&managerMessages.HouseCheckOutACK{houseID: msg.houseID})
 		}
 		future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseCheckOut{CheckOut: msg}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
@@ -153,7 +161,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 
 			switch res.(type) {
 			case *verifierMessages.HouseCheckOutACK:
-				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
+				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, houseID: msg.houseID})
 				log.Print("Manager: Received HouseCheckOut ACK")
 			default:
 				log.Print("Manager: Received unexpected response, ", res)
@@ -161,16 +169,16 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		})
 	case *propertyMessages.ExaminationRejects:
 		var updatedhouses, houses []*managerMessages.ExaminationReject
-		ExaminedHouse := m.db.QueryReside(msg.HouseID)
+		ExaminedHouse := m.db.QueryReside(msg.houseID)
 		var updatedids, deletedids []int32
 		for _, house := range ExaminedHouse {
 			if house.FamilyID != 0 {
-				updatedhouses = append(updatedhouses, &managerMessages.ExaminationReject{HouseID: house.HouseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
-				updatedids = append(updatedids, house.HouseID)
+				updatedhouses = append(updatedhouses, &managerMessages.ExaminationReject{houseID: house.houseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
+				updatedids = append(updatedids, house.houseID)
 			} else {
-				deletedids = append(deletedids, house.HouseID)
+				deletedids = append(deletedids, house.houseID)
 			}
-			houses = append(houses, &managerMessages.ExaminationReject{HouseID: house.HouseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
+			houses = append(houses, &managerMessages.ExaminationReject{houseID: house.houseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
 		}
 		if len(updatedids) != 0 {
 			err := m.db.SignedDeleteHouse(updatedids)
@@ -218,7 +226,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				log.Print("Manager: Received UnqualifiedResides ACK")
 				var ids []int32
 				for _, house := range msg.Resides {
-					ids = append(ids, house.HouseID)
+					ids = append(ids, house.houseID)
 				}
 				err := m.db.DeleteHouse(ids)
 				if err != nil {

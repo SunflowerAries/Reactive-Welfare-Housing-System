@@ -23,7 +23,7 @@ type Env struct {
 	verifierPID    *actor.PID
 }
 
-var rootContext *actor.RootContext
+var system *actor.ActorSystem
 
 func main() {
 	db, err := storage.InitDB()
@@ -31,21 +31,21 @@ func main() {
 		log.Panic(err)
 	}
 
-	rootContext = actor.EmptyRootContext
-	distributorPID := rootContext.Spawn(actor.PropsFromProducer(distributor.NewDistributorActor(db)).WithMailbox(mailbox.Unbounded()))
-	managerPID := rootContext.Spawn(actor.PropsFromProducer(manager.NewManagerActor(db)).WithMailbox(mailbox.Unbounded()))
-	veriferPID := rootContext.Spawn(actor.PropsFromProducer(verifier.NewVerifierActor()).WithMailbox(mailbox.Unbounded()))
+	system = actor.NewActorSystem()
+	distributorPID := system.Root.Spawn(actor.PropsFromProducer(distributor.NewDistributorActor(db)).WithMailbox(mailbox.Unbounded()))
+	managerPID := system.Root.Spawn(actor.PropsFromProducer(manager.NewManagerActor(db)).WithMailbox(mailbox.Unbounded()))
+	veriferPID := system.Root.Spawn(actor.PropsFromProducer(verifier.NewVerifierActor()).WithMailbox(mailbox.Unbounded()))
 	fmt.Println(distributorPID, managerPID, veriferPID)
-	rootContext.Send(distributorPID, &sharedMessages.ManagerConnect{
+	system.Root.Send(distributorPID, &sharedMessages.ManagerConnect{
 		Sender: managerPID,
 	})
-	rootContext.Send(veriferPID, &sharedMessages.DistributorConnect{
+	system.Root.Send(veriferPID, &sharedMessages.DistributorConnect{
 		Sender: distributorPID,
 	})
-	rootContext.Send(managerPID, &sharedMessages.VerifierConnect{
+	system.Root.Send(managerPID, &sharedMessages.VerifierConnect{
 		Sender: veriferPID,
 	})
-	// rootContext.Send(managerPID, &sharedMessages.Connect{
+	// system.Root.Send(managerPID, &sharedMessages.Connect{
 	// 	Sender: distributorPID,
 	// })
 	env := &Env{db, distributorPID, managerPID, veriferPID}
@@ -72,7 +72,7 @@ func (env *Env) usersIndex(w http.ResponseWriter, req *http.Request) {
 		for i, request := range newrequest {
 			requests[i] = &sharedMessages.NewRequest{FamilyID: request.FamilyID, Level: request.Level}
 		}
-		rootContext.Request(env.verifierPID, &sharedMessages.NewRequests{Requests: requests})
+		system.Root.Request(env.verifierPID, &sharedMessages.NewRequests{Requests: requests})
 	}
 }
 
@@ -92,7 +92,7 @@ func (env *Env) userscheckoutIndex(w http.ResponseWriter, req *http.Request) {
 		for i, checkout := range newcheckout {
 			checkouts[i] = &sharedMessages.NewCheckOut{FamilyID: checkout.FamilyID, Level: checkout.Level}
 		}
-		rootContext.Request(env.verifierPID, &sharedMessages.NewCheckOuts{CheckOuts: checkouts})
+		system.Root.Request(env.verifierPID, &sharedMessages.NewCheckOuts{CheckOuts: checkouts})
 	}
 }
 
@@ -109,7 +109,7 @@ func (env *Env) housescheckIndex(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "extraneous data after JSON object", http.StatusBadRequest)
 		}
 		// https://stackoverflow.com/questions/55381710/converting-internal-go-struct-array-to-protobuf-generated-pointer-array
-		rootContext.Request(env.managerPID, &sharedMessages.ExaminationList{HouseID: checkids})
+		system.Root.Request(env.managerPID, &sharedMessages.ExaminationList{HouseID: checkids})
 		// distributor.
 		// Do something with POST URL
 		// messages.
@@ -139,7 +139,7 @@ func (env *Env) housesIndex(w http.ResponseWriter, req *http.Request) {
 		for i, house := range newhouse {
 			houses[i] = &sharedMessages.NewHouse{Level: house.Level, Age: house.Age, Area: house.Area}
 		}
-		rootContext.Request(env.managerPID, &sharedMessages.NewHouses{Houses: houses})
+		system.Root.Request(env.managerPID, &sharedMessages.NewHouses{Houses: houses})
 		// distributor.
 		// Do something with POST URL
 		// messages.

@@ -12,7 +12,7 @@ message HouseApplicationReject {
 }
 
 message NewHousesACK {
-    
+    int32 CommitIndex = 1;
 }
 
 message HouseApplicationACK {

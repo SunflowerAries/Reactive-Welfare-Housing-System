@@ -9,9 +9,9 @@
 
 ## 参与开发
 
-需要手动安装 [protobuf](https://grpc.io/docs/quickstart/go/) 
+需要安装 [protobuf](https://grpc.io/docs/quickstart/go/) 、[Redis](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-20-04)
 
-建议新建一个用户，方式为
+建议在 `mysql` 中新建一个用户，方式为
 
 ```sql
 -- 创建用户
