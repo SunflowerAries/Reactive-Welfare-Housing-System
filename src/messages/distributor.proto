@@ -39,7 +39,7 @@ message HouseCheckOutACK {
 }
 
 message UnqualifiedHousesACK {
-
+    int32 CommitIndex = 1;
 }
 
 message HouseMatch {

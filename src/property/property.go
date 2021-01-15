@@ -1,8 +1,8 @@
 package property
 
 import (
-	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
+	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 	"Reactive-Welfare-Housing-System/src/storage"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -14,23 +14,21 @@ type propertyActor struct {
 }
 
 // Exam the house, we need define a metric to do with
-func ExamHouse(h storage.House) bool {
+func examHouse(h storage.House) bool {
 	return h.Age <= 5
 }
 
 func (p *propertyActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
-	case *managerMessages.ExaminationList:
-		ExaminedHouse := p.db.QueryHouse(msg.HouseID)
+	case *sharedMessages.ExaminationList:
+		examinedHouses := p.db.QueryHouse(msg.HouseID)
 		var houses []int32
-		for _, house := range ExaminedHouse {
-			if ExamHouse(house) != true {
+		for _, house := range examinedHouses {
+			if examHouse(house) != true {
 				houses = append(houses, house.ID)
 			}
 		}
-		if len(houses) == 0 {
-			ctx.Respond(&propertyMessages.ExaminationACK{})
-		} else {
+		if len(houses) != 0 {
 			ctx.Respond(&propertyMessages.ExaminationRejects{HouseID: houses})
 		}
 	}

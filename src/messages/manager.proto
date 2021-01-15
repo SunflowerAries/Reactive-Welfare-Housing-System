@@ -49,7 +49,3 @@ message UnqualifiedHouses {
 message UnqualifiedResides {
     repeated ExaminationReject Resides = 1;
 }
-
-message ExaminationList {
-    repeated int32 HouseID = 1;
-}

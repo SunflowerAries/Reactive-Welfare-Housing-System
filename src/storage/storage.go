@@ -78,7 +78,7 @@ type HouseSystem interface {
 	CheckOutHouse(reside Reside) error
 	QueryReside(HouseID []int32) []Reside
 	QueryHouse(HouseID []int32) []House
-	SignedDeleteHouse(HouseID []int32) error
+	DeleteHouseAndReside(HouseID []int32) error
 	DeleteHouse(HouseID []int32) error
 	DeleteReside(reside Reside)
 	ClearHouse() []Reside

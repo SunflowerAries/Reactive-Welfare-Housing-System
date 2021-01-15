@@ -26,17 +26,24 @@ type index struct {
 	mu  sync.Mutex
 }
 
-type newhouseLog struct {
+type houseLog struct {
 	log         []storage.House
 	commitIndex index
 }
 
+type resideLog struct {
+	log         []storage.Reside
+	commitIndex index
+}
+
 type managerActor struct {
-	db             storage.HouseSystem
-	distributorPID *actor.PID
-	propertyPID    *actor.PID
-	verifierPID    *actor.PID
-	newhousesLog   newhouseLog
+	db                    storage.HouseSystem
+	distributorPID        *actor.PID
+	propertyPID           *actor.PID
+	verifierPID           *actor.PID
+	newHousesLog          houseLog
+	unqualifiedHousesLog  houseLog
+	unqualifiedResidesLog resideLog
 }
 
 func (m *managerActor) Receive(ctx actor.Context) {
@@ -52,54 +59,37 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		//	ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
 		//}
 	case *sharedMessages.NewHouses:
-		pstart := len(m.newhousesLog.log)
+		pstart := len(m.newHousesLog.log)
 		for _, house := range msg.Houses {
-			m.newhousesLog.log = append(m.newhousesLog.log, storage.House{Level: house.Level, Age: house.Age, Area: house.Area})
+			m.newHousesLog.log = append(m.newHousesLog.log, storage.House{Level: house.Level, Age: house.Age, Area: house.Area})
 		}
 		go func(pstart int, length int) {
-			houseID := m.db.BatchInsertHouse(m.newhousesLog.log[pstart : pstart+length])
+			houseID := m.db.BatchInsertHouse(m.newHousesLog.log[pstart : pstart+length])
 			for i := 0; i < len(houseID); i++ {
 				for j := 0; j < houseID[i].Length; j++ {
-					m.newhousesLog.log[pstart+j].ID = int32(houseID[i].Idx + j)
+					m.newHousesLog.log[pstart+j].ID = int32(houseID[i].Idx + j)
 				}
 				pstart += houseID[i].Length
 			}
-			m.newhousesLog.commitIndex.mu.Lock()
-			commitIndex := m.newhousesLog.commitIndex.idx
-			m.newhousesLog.commitIndex.mu.Unlock()
-			newhouses := make([]*sharedMessages.NewHouse, 0, len(m.newhousesLog.log)-commitIndex)
-			for _, house := range m.newhousesLog.log[commitIndex:] {
+			m.newHousesLog.commitIndex.mu.Lock()
+			commitIndex := m.newHousesLog.commitIndex.idx
+			m.newHousesLog.commitIndex.mu.Unlock()
+			newhouses := make([]*sharedMessages.NewHouse, 0, len(m.newHousesLog.log)-commitIndex)
+			for _, house := range m.newHousesLog.log[commitIndex:] {
 				newhouses = append(newhouses, &sharedMessages.NewHouse{ID: house.ID, Level: house.Level})
 			}
 			ctx.Request(m.distributorPID, &managerMessages.NewHouses{Houses: &sharedMessages.NewHouses{Houses: newhouses}, CommitIndex: int32(commitIndex)})
-		}(pstart, len(m.newhousesLog.log)-pstart)
+		}(pstart, len(m.newHousesLog.log)-pstart)
 	case *distributorMessages.NewHousesACK:
-		m.newhousesLog.commitIndex.mu.Lock()
-		m.newhousesLog.commitIndex.idx = utils.Max(m.newhousesLog.commitIndex.idx, int(msg.CommitIndex))
-		m.newhousesLog.commitIndex.mu.Unlock()
+		m.newHousesLog.commitIndex.mu.Lock()
+		m.newHousesLog.commitIndex.idx = utils.Max(m.newHousesLog.commitIndex.idx, int(msg.CommitIndex))
+		m.newHousesLog.commitIndex.mu.Unlock()
 	case *sharedMessages.DistributorConnect:
 		m.distributorPID = msg.Sender
 	case *sharedMessages.VerifierConnect:
 		m.verifierPID = msg.Sender
-	case *sharedMessages.ExaminationList:
-		future := ctx.RequestFuture(m.propertyPID, &managerMessages.ExaminationList{houseID: msg.houseID}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-				return
-			}
-
-			switch res.(type) {
-			case *propertyMessages.ExaminationACK:
-				log.Print("Manager: Received Examination ACK")
-			case *propertyMessages.ExaminationRejects:
-				ctx.Self().Tell(res.(*propertyMessages.ExaminationRejects))
-			default:
-				log.Print("Manager: Received unexpected response, ", res)
-			}
-		})
 	case *distributorMessages.HouseMatch:
-		ret, err := m.db.InsertMatch(storage.Reside{houseID: msg.houseID, FamilyID: msg.FamilyID})
+		ret, err := m.db.InsertMatch(storage.Reside{HouseID: msg.HouseID, FamilyID: msg.FamilyID})
 		var reason int32
 		if err != nil || (!ret.FamilyOwnHouse && !ret.Success) {
 			log.Print("Manager: Insert house failed, ", err)
@@ -144,12 +134,12 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		}
 	case *distributorMessages.HouseCheckOut:
 		if msg.Retry != true {
-			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, houseID: msg.houseID})
+			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
 			if err != nil {
 				log.Print("Manager: Checkout house failed ", err)
 				return
 			}
-			ctx.Respond(&managerMessages.HouseCheckOutACK{houseID: msg.houseID})
+			ctx.Respond(&managerMessages.HouseCheckOutACK{HouseID: msg.HouseID})
 		}
 		future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseCheckOut{CheckOut: msg}, 2000*time.Millisecond)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
@@ -161,81 +151,50 @@ func (m *managerActor) Receive(ctx actor.Context) {
 
 			switch res.(type) {
 			case *verifierMessages.HouseCheckOutACK:
-				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, houseID: msg.houseID})
+				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
 				log.Print("Manager: Received HouseCheckOut ACK")
 			default:
 				log.Print("Manager: Received unexpected response, ", res)
 			}
 		})
 	case *propertyMessages.ExaminationRejects:
-		var updatedhouses, houses []*managerMessages.ExaminationReject
-		ExaminedHouse := m.db.QueryReside(msg.houseID)
-		var updatedids, deletedids []int32
-		for _, house := range ExaminedHouse {
-			if house.FamilyID != 0 {
-				updatedhouses = append(updatedhouses, &managerMessages.ExaminationReject{houseID: house.houseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
-				updatedids = append(updatedids, house.houseID)
-			} else {
-				deletedids = append(deletedids, house.houseID)
+		go func(houseIDs []int32) {
+			var updatedResides, houses []*managerMessages.ExaminationReject
+			examinedHouse := m.db.QueryReside(houseIDs)
+			if err := m.db.DeleteHouseAndReside(houseIDs); err != nil {
+				log.Printf("propertyMessages.ExaminationRejects[manager]: delete house and reside fail, ", err)
 			}
-			houses = append(houses, &managerMessages.ExaminationReject{houseID: house.houseID, Age: house.Age, Area: house.Area, Level: house.Level, FamilyID: house.FamilyID})
-		}
-		if len(updatedids) != 0 {
-			err := m.db.SignedDeleteHouse(updatedids)
-			if err != nil {
-				log.Print("Manager: Update house failed, ", err)
-			}
-		}
-		if len(deletedids) != 0 {
-			err := m.db.DeleteHouse(deletedids)
-			if err != nil {
-				log.Print("Manager: Delete house failed, ", err)
-			}
-		}
-		if len(houses) != 0 {
-			ctx.Self().Tell(&managerMessages.UnqualifiedHouses{Houses: houses})
-			if len(updatedhouses) != 0 {
-				ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: updatedhouses})
-			}
-		}
-	case *managerMessages.UnqualifiedHouses:
-		future := ctx.RequestFuture(m.distributorPID, msg, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-				return
-			}
-
-			switch res.(type) {
-			case *distributorMessages.UnqualifiedHousesACK:
-				log.Print("Manager: Received UnqualifiedHouses ACK")
-			default:
-				log.Print("Manager: Received unexpected response, ", res)
-			}
-		})
-	case *managerMessages.UnqualifiedResides:
-		future := ctx.RequestFuture(m.verifierPID, msg, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-				return
-			}
-
-			switch res.(type) {
-			case *verifierMessages.UnqualifiedResidesACK:
-				log.Print("Manager: Received UnqualifiedResides ACK")
-				var ids []int32
-				for _, house := range msg.Resides {
-					ids = append(ids, house.houseID)
+			for _, house := range examinedHouse {
+				if house.FamilyID != 0 {
+					m.unqualifiedResidesLog.log = append(m.unqualifiedResidesLog.log, storage.Reside{HouseID: house.HouseID, Level: house.Level, FamilyID: house.FamilyID})
+				} else {
+					m.unqualifiedHousesLog.log = append(m.unqualifiedHousesLog.log, storage.House{ID: house.HouseID, Level: house.Level})
 				}
-				err := m.db.DeleteHouse(ids)
-				if err != nil {
-					log.Print("Manager: Delete house failed, ", err)
-				}
-			default:
-				log.Print("Manager: Received unexpected response, ", res)
 			}
-		})
+			m.unqualifiedHousesLog.commitIndex.mu.Lock()
+			houseCommitIndex := m.unqualifiedHousesLog.commitIndex.idx
+			m.unqualifiedHousesLog.commitIndex.mu.Unlock()
+			for _, house := range m.unqualifiedHousesLog.log[houseCommitIndex:] {
+				houses = append(houses, &managerMessages.ExaminationReject{HouseID: house.ID, Level: house.Level})
+			}
+			ctx.Request(m.distributorPID, &managerMessages.UnqualifiedHouses{Houses: houses})
+
+			m.unqualifiedResidesLog.commitIndex.mu.Lock()
+			resideCommitIndex := m.unqualifiedResidesLog.commitIndex.idx
+			m.unqualifiedResidesLog.commitIndex.mu.Unlock()
+			for _, reside := range m.unqualifiedResidesLog.log[resideCommitIndex:] {
+				updatedResides = append(updatedResides, &managerMessages.ExaminationReject{HouseID: reside.HouseID, Level: reside.Level, FamilyID: reside.FamilyID})
+			}
+			ctx.Request(m.verifierPID, &managerMessages.UnqualifiedResides{Resides: updatedResides})
+		}(msg.HouseID)
+	case *distributorMessages.UnqualifiedHousesACK:
+		m.unqualifiedHousesLog.commitIndex.mu.Lock()
+		m.unqualifiedHousesLog.commitIndex.idx = utils.Max(m.unqualifiedHousesLog.commitIndex.idx, int(msg.CommitIndex))
+		m.unqualifiedHousesLog.commitIndex.mu.Unlock()
+	case *verifierMessages.UnqualifiedResidesACK:
+		m.unqualifiedResidesLog.commitIndex.mu.Lock()
+		m.unqualifiedResidesLog.commitIndex.idx = utils.Max(m.unqualifiedResidesLog.commitIndex.idx, int(msg.CommitIndex))
+		m.unqualifiedResidesLog.commitIndex.mu.Unlock()
 	default:
 		fmt.Println(reflect.TypeOf(msg), msg)
 	}

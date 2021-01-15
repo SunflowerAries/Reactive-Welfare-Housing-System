@@ -25,7 +25,7 @@ message HouseMatchRejectACK {
 }
 
 message UnqualifiedResidesACK {
-
+    int32 CommitIndex = 1;
 }
 
 message HouseCheckOut {

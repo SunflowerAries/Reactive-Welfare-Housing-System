@@ -491,53 +491,6 @@ func (x *UnqualifiedResides) GetResides() []*ExaminationReject {
 	return nil
 }
 
-type ExaminationList struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	HouseID []int32 `protobuf:"varint,1,rep,packed,name=HouseID,proto3" json:"HouseID,omitempty"`
-}
-
-func (x *ExaminationList) Reset() {
-	*x = ExaminationList{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_manager_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ExaminationList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExaminationList) ProtoMessage() {}
-
-func (x *ExaminationList) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_manager_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExaminationList.ProtoReflect.Descriptor instead.
-func (*ExaminationList) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ExaminationList) GetHouseID() []int32 {
-	if x != nil {
-		return x.HouseID
-	}
-	return nil
-}
-
 var File_Reactive_Welfare_Housing_System_src_messages_manager_proto protoreflect.FileDescriptor
 
 var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDesc = []byte{
@@ -602,14 +555,11 @@ var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDesc = []
 	0x07, 0x52, 0x65, 0x73, 0x69, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1a,
 	0x2e, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x45, 0x78, 0x61, 0x6d, 0x69, 0x6e, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x07, 0x52, 0x65, 0x73, 0x69,
-	0x64, 0x65, 0x73, 0x22, 0x2b, 0x0a, 0x0f, 0x45, 0x78, 0x61, 0x6d, 0x69, 0x6e, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49,
-	0x44, 0x18, 0x01, 0x20, 0x03, 0x28, 0x05, 0x52, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44,
-	0x42, 0x3e, 0x5a, 0x3c, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d, 0x57, 0x65, 0x6c,
-	0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d, 0x53, 0x79, 0x73,
-	0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
-	0x2f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x64, 0x65, 0x73, 0x42, 0x3e, 0x5a, 0x3c, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d,
+	0x57, 0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d,
+	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x2f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -624,7 +574,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDescGZIP
 	return file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDescData
 }
 
-var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_goTypes = []interface{}{
 	(*HouseMatchApprove)(nil),                 // 0: manager.HouseMatchApprove
 	(*HouseCheckOut)(nil),                     // 1: manager.HouseCheckOut
@@ -635,16 +585,15 @@ var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_goTypes = []
 	(*ExaminationReject)(nil),                 // 6: manager.ExaminationReject
 	(*UnqualifiedHouses)(nil),                 // 7: manager.UnqualifiedHouses
 	(*UnqualifiedResides)(nil),                // 8: manager.UnqualifiedResides
-	(*ExaminationList)(nil),                   // 9: manager.ExaminationList
-	(*distributorMessages.HouseMatch)(nil),    // 10: distributor.HouseMatch
-	(*distributorMessages.HouseCheckOut)(nil), // 11: distributor.HouseCheckOut
-	(*sharedMessages.NewHouses)(nil),          // 12: shared.NewHouses
+	(*distributorMessages.HouseMatch)(nil),    // 9: distributor.HouseMatch
+	(*distributorMessages.HouseCheckOut)(nil), // 10: distributor.HouseCheckOut
+	(*sharedMessages.NewHouses)(nil),          // 11: shared.NewHouses
 }
 var file_Reactive_Welfare_Housing_System_src_messages_manager_proto_depIdxs = []int32{
-	10, // 0: manager.HouseMatchApprove.Match:type_name -> distributor.HouseMatch
-	11, // 1: manager.HouseCheckOut.CheckOut:type_name -> distributor.HouseCheckOut
-	10, // 2: manager.HouseMatchReject.Match:type_name -> distributor.HouseMatch
-	12, // 3: manager.NewHouses.Houses:type_name -> shared.NewHouses
+	9,  // 0: manager.HouseMatchApprove.Match:type_name -> distributor.HouseMatch
+	10, // 1: manager.HouseCheckOut.CheckOut:type_name -> distributor.HouseCheckOut
+	9,  // 2: manager.HouseMatchReject.Match:type_name -> distributor.HouseMatch
+	11, // 3: manager.NewHouses.Houses:type_name -> shared.NewHouses
 	6,  // 4: manager.UnqualifiedHouses.Houses:type_name -> manager.ExaminationReject
 	6,  // 5: manager.UnqualifiedResides.Resides:type_name -> manager.ExaminationReject
 	6,  // [6:6] is the sub-list for method output_type
@@ -768,18 +717,6 @@ func file_Reactive_Welfare_Housing_System_src_messages_manager_proto_init() {
 				return nil
 			}
 		}
-		file_Reactive_Welfare_Housing_System_src_messages_manager_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExaminationList); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -787,7 +724,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_manager_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Reactive_Welfare_Housing_System_src_messages_manager_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

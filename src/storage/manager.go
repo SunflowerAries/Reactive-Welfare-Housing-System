@@ -27,7 +27,7 @@ func (db *DB) DeleteHouse(HouseID []int32) error {
 	for i, id := range HouseID {
 		args[i] = id
 	}
-	stmt := `DELETE FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
+	stmt := `UPDATE house SET house.deleted = true WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `)`
 	_, err := db.Exec(stmt, args...)
 	return err
 }
@@ -36,7 +36,7 @@ func (db *DB) DeleteReside(reside Reside) {
 	db.Exec(`DELETE FROM reside WHERE house_id = ? AND family_id = ?`, reside.HouseID, reside.FamilyID)
 }
 
-func (db *DB) SignedDeleteHouse(HouseID []int32) error {
+func (db *DB) DeleteHouseAndReside(HouseID []int32) error {
 	args := make([]interface{}, len(HouseID))
 	for i, id := range HouseID {
 		args[i] = id
@@ -51,13 +51,13 @@ func (db *DB) QueryReside(HouseID []int32) []Reside {
 	for i, id := range HouseID {
 		args[i] = id
 	}
-	stmt := `SELECT H.id, H.age, H.area, H.level, R.family_id FROM (SELECT * FROM house WHERE id IN (?` + strings.Repeat(",?", len(args)-1) + `)) AS H
+	stmt := `SELECT H.id, H.age, H.area, H.level, R.family_id FROM (SELECT * FROM house WHERE deleted = false AND id IN (?` + strings.Repeat(",?", len(args)-1) + `)) AS H
 	 LEFT JOIN (SELECT * FROM reside WHERE checkout = false) AS R ON H.id = R.house_id`
 	rows, err := db.Query(stmt, args...)
 	if err != nil {
 		fmt.Println("QueryHouse error: ", err)
 	}
-	var examined []Reside
+	examined := []Reside{}
 
 	for rows.Next() {
 		var house NullableReside
