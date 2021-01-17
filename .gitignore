@@ -2,3 +2,5 @@ build/
 3rdparty/
 wait.go
 .idea
+
+src/messages/**/*.go

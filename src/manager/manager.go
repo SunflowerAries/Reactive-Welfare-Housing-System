@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"Reactive-Welfare-Housing-System/src/config"
 	"Reactive-Welfare-Housing-System/src/messages/distributorMessages"
 	"Reactive-Welfare-Housing-System/src/messages/managerMessages"
 	"Reactive-Welfare-Housing-System/src/messages/propertyMessages"
@@ -51,7 +52,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 			for {
 				select {
 				// 300ms
-				case <-time.Tick(utils.TIME_OUT * time.Millisecond):
+				case <-time.Tick(config.TIME_OUT * time.Millisecond):
 					go func() {
 						m.unqualifiedResides2DLog.Mu.RLock()
 						houseCommitIndex := m.unqualifiedResides2DLog.commitIndex
