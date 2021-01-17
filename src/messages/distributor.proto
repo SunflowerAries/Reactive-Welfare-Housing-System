@@ -6,32 +6,38 @@ option go_package = "Reactive-Welfare-Housing-System/src/messages/distributorMes
 import "github.com/AsynkronIT/protoactor-go/actor/protos.proto";
 import "Reactive-Welfare-Housing-System/src/messages/verifier.proto";
 
-message HouseApplicationReject {
-    verifier.HouseApplicationRequest Request = 1;
-    string Reason = 2;
-}
-
 message NewHousesACK {
-    int32 CommitIndex = 1;
+  int32 CommitIndex = 1;
 }
 
-message HouseApplicationACK {
-
+message HouseApplicationResponse {
+  int32 FamilyID = 1;
+  int32 Status = 2;
+  HouseMatch Match = 3;
 }
 
-message MatchEmptyHouse {
-    verifier.HouseApplicationRequest Request = 1;
-    actor.PID Sender = 2;
+message HouseApplicationResponses {
+  repeated HouseApplicationResponse Responses = 1;
+  int32 CommitIndex = 2;
+}
+
+message HouseMatchRequest {
+  int32 FamilyID = 1;
+  HouseMatch Match = 3;
+}
+
+message HouseMatchRequests {
+  repeated HouseMatchRequest Requests = 1;
+  int32 CommitIndex = 2;
 }
 
 message HouseCheckOutResponse {
-    string Answer = 1;
+  string Answer = 1;
 }
 
 message HouseCheckOut {
-    int32 FamilyID = 1;
-    int32 HouseID = 2;
-    bool Retry = 3;
+  int32 FamilyID = 1;
+  int32 HouseID = 2;
 }
 
 message HouseCheckOutACK {
@@ -39,11 +45,10 @@ message HouseCheckOutACK {
 }
 
 message UnqualifiedHousesACK {
-    int32 CommitIndex = 1;
+  int32 CommitIndex = 1;
 }
 
 message HouseMatch {
-    int32 FamilyID = 1;
-    int32 HouseID = 2;
-    int32 Level = 3;
+  int32 HouseID = 1;
+  int32 Level = 2;
 }

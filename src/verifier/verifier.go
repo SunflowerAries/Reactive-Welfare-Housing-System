@@ -87,7 +87,8 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		log.Print("Verifier: Received HouseCheckOut, ", msg.CheckOut)
 		ctx.Respond(&verifierMessages.HouseCheckOutACK{})
 	case *managerMessages.UnqualifiedResides:
-		log.Print("Verifier: Received UnqualifiedResides, ", msg.Resides)
+		// D->V should not be high level???
+		log.Print("Verifier: Received UnqualifiedResides, ", msg.Houses)
 		ctx.Respond(&verifierMessages.UnqualifiedResidesACK{})
 	default:
 		fmt.Printf("%+v\n", msg)

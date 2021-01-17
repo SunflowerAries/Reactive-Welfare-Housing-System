@@ -7,8 +7,8 @@
 package distributorMessages
 
 import (
-	verifierMessages "Reactive-Welfare-Housing-System/src/messages/verifierMessages"
-	actor "github.com/AsynkronIT/protoactor-go/actor"
+	_ "Reactive-Welfare-Housing-System/src/messages/verifierMessages"
+	_ "github.com/AsynkronIT/protoactor-go/actor"
 	proto "github.com/golang/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -27,61 +27,6 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type HouseApplicationReject struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Request *verifierMessages.HouseApplicationRequest `protobuf:"bytes,1,opt,name=Request,proto3" json:"Request,omitempty"`
-	Reason  string                                    `protobuf:"bytes,2,opt,name=Reason,proto3" json:"Reason,omitempty"`
-}
-
-func (x *HouseApplicationReject) Reset() {
-	*x = HouseApplicationReject{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HouseApplicationReject) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HouseApplicationReject) ProtoMessage() {}
-
-func (x *HouseApplicationReject) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HouseApplicationReject.ProtoReflect.Descriptor instead.
-func (*HouseApplicationReject) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *HouseApplicationReject) GetRequest() *verifierMessages.HouseApplicationRequest {
-	if x != nil {
-		return x.Request
-	}
-	return nil
-}
-
-func (x *HouseApplicationReject) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
 type NewHousesACK struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -93,7 +38,7 @@ type NewHousesACK struct {
 func (x *NewHousesACK) Reset() {
 	*x = NewHousesACK{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -106,7 +51,7 @@ func (x *NewHousesACK) String() string {
 func (*NewHousesACK) ProtoMessage() {}
 
 func (x *NewHousesACK) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -119,7 +64,7 @@ func (x *NewHousesACK) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewHousesACK.ProtoReflect.Descriptor instead.
 func (*NewHousesACK) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{1}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *NewHousesACK) GetCommitIndex() int32 {
@@ -129,14 +74,80 @@ func (x *NewHousesACK) GetCommitIndex() int32 {
 	return 0
 }
 
-type HouseApplicationACK struct {
+type HouseApplicationResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	FamilyID int32       `protobuf:"varint,1,opt,name=FamilyID,proto3" json:"FamilyID,omitempty"`
+	Status   int32       `protobuf:"varint,2,opt,name=Status,proto3" json:"Status,omitempty"`
+	Match    *HouseMatch `protobuf:"bytes,3,opt,name=Match,proto3" json:"Match,omitempty"`
 }
 
-func (x *HouseApplicationACK) Reset() {
-	*x = HouseApplicationACK{}
+func (x *HouseApplicationResponse) Reset() {
+	*x = HouseApplicationResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HouseApplicationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HouseApplicationResponse) ProtoMessage() {}
+
+func (x *HouseApplicationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HouseApplicationResponse.ProtoReflect.Descriptor instead.
+func (*HouseApplicationResponse) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *HouseApplicationResponse) GetFamilyID() int32 {
+	if x != nil {
+		return x.FamilyID
+	}
+	return 0
+}
+
+func (x *HouseApplicationResponse) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *HouseApplicationResponse) GetMatch() *HouseMatch {
+	if x != nil {
+		return x.Match
+	}
+	return nil
+}
+
+type HouseApplicationResponses struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Responses   []*HouseApplicationResponse `protobuf:"bytes,1,rep,name=Responses,proto3" json:"Responses,omitempty"`
+	CommitIndex int32                       `protobuf:"varint,2,opt,name=CommitIndex,proto3" json:"CommitIndex,omitempty"`
+}
+
+func (x *HouseApplicationResponses) Reset() {
+	*x = HouseApplicationResponses{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -144,13 +155,13 @@ func (x *HouseApplicationACK) Reset() {
 	}
 }
 
-func (x *HouseApplicationACK) String() string {
+func (x *HouseApplicationResponses) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HouseApplicationACK) ProtoMessage() {}
+func (*HouseApplicationResponses) ProtoMessage() {}
 
-func (x *HouseApplicationACK) ProtoReflect() protoreflect.Message {
+func (x *HouseApplicationResponses) ProtoReflect() protoreflect.Message {
 	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -162,22 +173,36 @@ func (x *HouseApplicationACK) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HouseApplicationACK.ProtoReflect.Descriptor instead.
-func (*HouseApplicationACK) Descriptor() ([]byte, []int) {
+// Deprecated: Use HouseApplicationResponses.ProtoReflect.Descriptor instead.
+func (*HouseApplicationResponses) Descriptor() ([]byte, []int) {
 	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{2}
 }
 
-type MatchEmptyHouse struct {
+func (x *HouseApplicationResponses) GetResponses() []*HouseApplicationResponse {
+	if x != nil {
+		return x.Responses
+	}
+	return nil
+}
+
+func (x *HouseApplicationResponses) GetCommitIndex() int32 {
+	if x != nil {
+		return x.CommitIndex
+	}
+	return 0
+}
+
+type HouseMatchRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Request *verifierMessages.HouseApplicationRequest `protobuf:"bytes,1,opt,name=Request,proto3" json:"Request,omitempty"`
-	Sender  *actor.PID                                `protobuf:"bytes,2,opt,name=Sender,proto3" json:"Sender,omitempty"`
+	FamilyID int32       `protobuf:"varint,1,opt,name=FamilyID,proto3" json:"FamilyID,omitempty"`
+	Match    *HouseMatch `protobuf:"bytes,3,opt,name=Match,proto3" json:"Match,omitempty"`
 }
 
-func (x *MatchEmptyHouse) Reset() {
-	*x = MatchEmptyHouse{}
+func (x *HouseMatchRequest) Reset() {
+	*x = HouseMatchRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -185,13 +210,13 @@ func (x *MatchEmptyHouse) Reset() {
 	}
 }
 
-func (x *MatchEmptyHouse) String() string {
+func (x *HouseMatchRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MatchEmptyHouse) ProtoMessage() {}
+func (*HouseMatchRequest) ProtoMessage() {}
 
-func (x *MatchEmptyHouse) ProtoReflect() protoreflect.Message {
+func (x *HouseMatchRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -203,23 +228,78 @@ func (x *MatchEmptyHouse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MatchEmptyHouse.ProtoReflect.Descriptor instead.
-func (*MatchEmptyHouse) Descriptor() ([]byte, []int) {
+// Deprecated: Use HouseMatchRequest.ProtoReflect.Descriptor instead.
+func (*HouseMatchRequest) Descriptor() ([]byte, []int) {
 	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *MatchEmptyHouse) GetRequest() *verifierMessages.HouseApplicationRequest {
+func (x *HouseMatchRequest) GetFamilyID() int32 {
 	if x != nil {
-		return x.Request
+		return x.FamilyID
+	}
+	return 0
+}
+
+func (x *HouseMatchRequest) GetMatch() *HouseMatch {
+	if x != nil {
+		return x.Match
 	}
 	return nil
 }
 
-func (x *MatchEmptyHouse) GetSender() *actor.PID {
+type HouseMatchRequests struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Requests    []*HouseMatchRequest `protobuf:"bytes,1,rep,name=Requests,proto3" json:"Requests,omitempty"`
+	CommitIndex int32                `protobuf:"varint,2,opt,name=CommitIndex,proto3" json:"CommitIndex,omitempty"`
+}
+
+func (x *HouseMatchRequests) Reset() {
+	*x = HouseMatchRequests{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HouseMatchRequests) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HouseMatchRequests) ProtoMessage() {}
+
+func (x *HouseMatchRequests) ProtoReflect() protoreflect.Message {
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HouseMatchRequests.ProtoReflect.Descriptor instead.
+func (*HouseMatchRequests) Descriptor() ([]byte, []int) {
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *HouseMatchRequests) GetRequests() []*HouseMatchRequest {
 	if x != nil {
-		return x.Sender
+		return x.Requests
 	}
 	return nil
+}
+
+func (x *HouseMatchRequests) GetCommitIndex() int32 {
+	if x != nil {
+		return x.CommitIndex
+	}
+	return 0
 }
 
 type HouseCheckOutResponse struct {
@@ -233,7 +313,7 @@ type HouseCheckOutResponse struct {
 func (x *HouseCheckOutResponse) Reset() {
 	*x = HouseCheckOutResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -246,7 +326,7 @@ func (x *HouseCheckOutResponse) String() string {
 func (*HouseCheckOutResponse) ProtoMessage() {}
 
 func (x *HouseCheckOutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,7 +339,7 @@ func (x *HouseCheckOutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOutResponse.ProtoReflect.Descriptor instead.
 func (*HouseCheckOutResponse) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{4}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *HouseCheckOutResponse) GetAnswer() string {
@@ -276,13 +356,12 @@ type HouseCheckOut struct {
 
 	FamilyID int32 `protobuf:"varint,1,opt,name=FamilyID,proto3" json:"FamilyID,omitempty"`
 	HouseID  int32 `protobuf:"varint,2,opt,name=HouseID,proto3" json:"HouseID,omitempty"`
-	Retry    bool  `protobuf:"varint,3,opt,name=Retry,proto3" json:"Retry,omitempty"`
 }
 
 func (x *HouseCheckOut) Reset() {
 	*x = HouseCheckOut{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -295,7 +374,7 @@ func (x *HouseCheckOut) String() string {
 func (*HouseCheckOut) ProtoMessage() {}
 
 func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -308,7 +387,7 @@ func (x *HouseCheckOut) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOut.ProtoReflect.Descriptor instead.
 func (*HouseCheckOut) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{5}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *HouseCheckOut) GetFamilyID() int32 {
@@ -325,13 +404,6 @@ func (x *HouseCheckOut) GetHouseID() int32 {
 	return 0
 }
 
-func (x *HouseCheckOut) GetRetry() bool {
-	if x != nil {
-		return x.Retry
-	}
-	return false
-}
-
 type HouseCheckOutACK struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -341,7 +413,7 @@ type HouseCheckOutACK struct {
 func (x *HouseCheckOutACK) Reset() {
 	*x = HouseCheckOutACK{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -354,7 +426,7 @@ func (x *HouseCheckOutACK) String() string {
 func (*HouseCheckOutACK) ProtoMessage() {}
 
 func (x *HouseCheckOutACK) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -367,7 +439,7 @@ func (x *HouseCheckOutACK) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseCheckOutACK.ProtoReflect.Descriptor instead.
 func (*HouseCheckOutACK) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{6}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{7}
 }
 
 type UnqualifiedHousesACK struct {
@@ -381,7 +453,7 @@ type UnqualifiedHousesACK struct {
 func (x *UnqualifiedHousesACK) Reset() {
 	*x = UnqualifiedHousesACK{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[7]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -394,7 +466,7 @@ func (x *UnqualifiedHousesACK) String() string {
 func (*UnqualifiedHousesACK) ProtoMessage() {}
 
 func (x *UnqualifiedHousesACK) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[7]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -407,7 +479,7 @@ func (x *UnqualifiedHousesACK) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnqualifiedHousesACK.ProtoReflect.Descriptor instead.
 func (*UnqualifiedHousesACK) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{7}
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UnqualifiedHousesACK) GetCommitIndex() int32 {
@@ -422,15 +494,14 @@ type HouseMatch struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FamilyID int32 `protobuf:"varint,1,opt,name=FamilyID,proto3" json:"FamilyID,omitempty"`
-	HouseID  int32 `protobuf:"varint,2,opt,name=HouseID,proto3" json:"HouseID,omitempty"`
-	Level    int32 `protobuf:"varint,3,opt,name=Level,proto3" json:"Level,omitempty"`
+	HouseID int32 `protobuf:"varint,1,opt,name=HouseID,proto3" json:"HouseID,omitempty"`
+	Level   int32 `protobuf:"varint,2,opt,name=Level,proto3" json:"Level,omitempty"`
 }
 
 func (x *HouseMatch) Reset() {
 	*x = HouseMatch{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[8]
+		mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -443,7 +514,7 @@ func (x *HouseMatch) String() string {
 func (*HouseMatch) ProtoMessage() {}
 
 func (x *HouseMatch) ProtoReflect() protoreflect.Message {
-	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[8]
+	mi := &file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -456,14 +527,7 @@ func (x *HouseMatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HouseMatch.ProtoReflect.Descriptor instead.
 func (*HouseMatch) Descriptor() ([]byte, []int) {
-	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *HouseMatch) GetFamilyID() int32 {
-	if x != nil {
-		return x.FamilyID
-	}
-	return 0
+	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *HouseMatch) GetHouseID() int32 {
@@ -495,49 +559,60 @@ var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc 
 	0x57, 0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d,
 	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
 	0x67, 0x65, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x22, 0x6d, 0x0a, 0x16, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69,
-	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x6a, 0x65, 0x63, 0x74, 0x12, 0x3b, 0x0a, 0x07,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e,
-	0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70,
-	0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x52, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x61,
-	0x73, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x65, 0x61, 0x73, 0x6f,
-	0x6e, 0x22, 0x30, 0x0a, 0x0c, 0x4e, 0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x41, 0x43,
-	0x4b, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e,
-	0x64, 0x65, 0x78, 0x22, 0x15, 0x0a, 0x13, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x43, 0x4b, 0x22, 0x72, 0x0a, 0x0f, 0x4d, 0x61,
-	0x74, 0x63, 0x68, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x12, 0x3b, 0x0a,
-	0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21,
-	0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41,
-	0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x52, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x22, 0x0a, 0x06, 0x53, 0x65,
-	0x6e, 0x64, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x61, 0x63, 0x74,
-	0x6f, 0x72, 0x2e, 0x50, 0x49, 0x44, 0x52, 0x06, 0x53, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x22, 0x2f,
-	0x0a, 0x15, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x4f, 0x75, 0x74, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x41, 0x6e, 0x73, 0x77, 0x65,
-	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x41, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x22,
-	0x5b, 0x0a, 0x0d, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x4f, 0x75, 0x74,
+	0x74, 0x6f, 0x22, 0x30, 0x0a, 0x0c, 0x4e, 0x65, 0x77, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x41,
+	0x43, 0x4b, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65,
+	0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49,
+	0x6e, 0x64, 0x65, 0x78, 0x22, 0x7d, 0x0a, 0x18, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70,
+	0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x12, 0x1a, 0x0a, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x05, 0x52, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x18, 0x0a, 0x07,
-	0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x48,
-	0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x52, 0x65, 0x74, 0x72, 0x79, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x52, 0x65, 0x74, 0x72, 0x79, 0x22, 0x12, 0x0a, 0x10,
-	0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x4f, 0x75, 0x74, 0x41, 0x43, 0x4b,
-	0x22, 0x38, 0x0a, 0x14, 0x55, 0x6e, 0x71, 0x75, 0x61, 0x6c, 0x69, 0x66, 0x69, 0x65, 0x64, 0x48,
-	0x6f, 0x75, 0x73, 0x65, 0x73, 0x41, 0x43, 0x4b, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d,
-	0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43,
-	0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x58, 0x0a, 0x0a, 0x48, 0x6f,
-	0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x12, 0x1a, 0x0a, 0x08, 0x46, 0x61, 0x6d, 0x69,
-	0x6c, 0x79, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x46, 0x61, 0x6d, 0x69,
-	0x6c, 0x79, 0x49, 0x44, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x12, 0x14,
-	0x0a, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c,
-	0x65, 0x76, 0x65, 0x6c, 0x42, 0x42, 0x5a, 0x40, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65,
-	0x2d, 0x57, 0x65, 0x6c, 0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67,
-	0x2d, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73,
-	0x61, 0x67, 0x65, 0x73, 0x2f, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x6f, 0x72,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x28, 0x05, 0x52, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x12, 0x2d, 0x0a, 0x05, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x6f,
+	0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x05, 0x4d, 0x61,
+	0x74, 0x63, 0x68, 0x22, 0x82, 0x01, 0x0a, 0x19, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70,
+	0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x73, 0x12, 0x43, 0x0a, 0x09, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74,
+	0x6f, 0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x52, 0x09, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x73, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74,
+	0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43, 0x6f, 0x6d,
+	0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x5e, 0x0a, 0x11, 0x48, 0x6f, 0x75, 0x73,
+	0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a,
+	0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x2d, 0x0a, 0x05, 0x4d, 0x61, 0x74,
+	0x63, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x64, 0x69, 0x73, 0x74, 0x72,
+	0x69, 0x62, 0x75, 0x74, 0x6f, 0x72, 0x2e, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63,
+	0x68, 0x52, 0x05, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x22, 0x72, 0x0a, 0x12, 0x48, 0x6f, 0x75, 0x73,
+	0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x73, 0x12, 0x3a,
+	0x0a, 0x08, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x1e, 0x2e, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x6f, 0x72, 0x2e, 0x48,
+	0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x52, 0x08, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x73, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f,
+	0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x2f, 0x0a, 0x15,
+	0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x4f, 0x75, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x41, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x41, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x22, 0x45, 0x0a,
+	0x0d, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x4f, 0x75, 0x74, 0x12, 0x1a,
+	0x0a, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x08, 0x46, 0x61, 0x6d, 0x69, 0x6c, 0x79, 0x49, 0x44, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x6f,
+	0x75, 0x73, 0x65, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x48, 0x6f, 0x75,
+	0x73, 0x65, 0x49, 0x44, 0x22, 0x12, 0x0a, 0x10, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x43, 0x68, 0x65,
+	0x63, 0x6b, 0x4f, 0x75, 0x74, 0x41, 0x43, 0x4b, 0x22, 0x38, 0x0a, 0x14, 0x55, 0x6e, 0x71, 0x75,
+	0x61, 0x6c, 0x69, 0x66, 0x69, 0x65, 0x64, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x73, 0x41, 0x43, 0x4b,
+	0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x49, 0x6e, 0x64,
+	0x65, 0x78, 0x22, 0x3c, 0x0a, 0x0a, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x4d, 0x61, 0x74, 0x63, 0x68,
+	0x12, 0x18, 0x0a, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x07, 0x48, 0x6f, 0x75, 0x73, 0x65, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x4c, 0x65,
+	0x76, 0x65, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x4c, 0x65, 0x76, 0x65, 0x6c,
+	0x42, 0x42, 0x5a, 0x40, 0x52, 0x65, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d, 0x57, 0x65, 0x6c,
+	0x66, 0x61, 0x72, 0x65, 0x2d, 0x48, 0x6f, 0x75, 0x73, 0x69, 0x6e, 0x67, 0x2d, 0x53, 0x79, 0x73,
+	0x74, 0x65, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
+	0x2f, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x6f, 0x72, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -552,29 +627,29 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc
 	return file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDescData
 }
 
-var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_goTypes = []interface{}{
-	(*HouseApplicationReject)(nil),                   // 0: distributor.HouseApplicationReject
-	(*NewHousesACK)(nil),                             // 1: distributor.NewHousesACK
-	(*HouseApplicationACK)(nil),                      // 2: distributor.HouseApplicationACK
-	(*MatchEmptyHouse)(nil),                          // 3: distributor.MatchEmptyHouse
-	(*HouseCheckOutResponse)(nil),                    // 4: distributor.HouseCheckOutResponse
-	(*HouseCheckOut)(nil),                            // 5: distributor.HouseCheckOut
-	(*HouseCheckOutACK)(nil),                         // 6: distributor.HouseCheckOutACK
-	(*UnqualifiedHousesACK)(nil),                     // 7: distributor.UnqualifiedHousesACK
-	(*HouseMatch)(nil),                               // 8: distributor.HouseMatch
-	(*verifierMessages.HouseApplicationRequest)(nil), // 9: verifier.HouseApplicationRequest
-	(*actor.PID)(nil),                                // 10: actor.PID
+	(*NewHousesACK)(nil),              // 0: distributor.NewHousesACK
+	(*HouseApplicationResponse)(nil),  // 1: distributor.HouseApplicationResponse
+	(*HouseApplicationResponses)(nil), // 2: distributor.HouseApplicationResponses
+	(*HouseMatchRequest)(nil),         // 3: distributor.HouseMatchRequest
+	(*HouseMatchRequests)(nil),        // 4: distributor.HouseMatchRequests
+	(*HouseCheckOutResponse)(nil),     // 5: distributor.HouseCheckOutResponse
+	(*HouseCheckOut)(nil),             // 6: distributor.HouseCheckOut
+	(*HouseCheckOutACK)(nil),          // 7: distributor.HouseCheckOutACK
+	(*UnqualifiedHousesACK)(nil),      // 8: distributor.UnqualifiedHousesACK
+	(*HouseMatch)(nil),                // 9: distributor.HouseMatch
 }
 var file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_depIdxs = []int32{
-	9,  // 0: distributor.HouseApplicationReject.Request:type_name -> verifier.HouseApplicationRequest
-	9,  // 1: distributor.MatchEmptyHouse.Request:type_name -> verifier.HouseApplicationRequest
-	10, // 2: distributor.MatchEmptyHouse.Sender:type_name -> actor.PID
-	3,  // [3:3] is the sub-list for method output_type
-	3,  // [3:3] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	9, // 0: distributor.HouseApplicationResponse.Match:type_name -> distributor.HouseMatch
+	1, // 1: distributor.HouseApplicationResponses.Responses:type_name -> distributor.HouseApplicationResponse
+	9, // 2: distributor.HouseMatchRequest.Match:type_name -> distributor.HouseMatch
+	3, // 3: distributor.HouseMatchRequests.Requests:type_name -> distributor.HouseMatchRequest
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() }
@@ -584,18 +659,6 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseApplicationReject); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*NewHousesACK); i {
 			case 0:
 				return &v.state
@@ -607,8 +670,20 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 				return nil
 			}
 		}
+		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HouseApplicationResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseApplicationACK); i {
+			switch v := v.(*HouseApplicationResponses); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -620,7 +695,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MatchEmptyHouse); i {
+			switch v := v.(*HouseMatchRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -632,7 +707,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseCheckOutResponse); i {
+			switch v := v.(*HouseMatchRequests); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -644,7 +719,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseCheckOut); i {
+			switch v := v.(*HouseCheckOutResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -656,7 +731,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HouseCheckOutACK); i {
+			switch v := v.(*HouseCheckOut); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -668,7 +743,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UnqualifiedHousesACK); i {
+			switch v := v.(*HouseCheckOutACK); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -680,6 +755,18 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			}
 		}
 		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UnqualifiedHousesACK); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*HouseMatch); i {
 			case 0:
 				return &v.state
@@ -698,7 +785,7 @@ func file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_init() 
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Reactive_Welfare_Housing_System_src_messages_distributor_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"Reactive-Welfare-Housing-System/src/utils"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -12,12 +13,14 @@ import (
 
 // dependency injection with interface https://www.alexedwards.net/blog/organising-database-access
 const HouseArgLens = 3
+const ResideArgLens = 2
 
 type House struct {
-	ID    int32
-	Level int32
-	Age   int32
-	Area  int32
+	ID      int32
+	Level   int32
+	Age     int32
+	Area    int32
+	Deleted bool
 }
 
 type Family struct {
@@ -35,8 +38,6 @@ type Reside struct {
 	HouseID  int32
 	FamilyID int32
 	Level    int32
-	Age      int32
-	Area     int32
 }
 
 type NullableReside struct {
@@ -68,13 +69,13 @@ type MatchResponse struct {
 
 type BatchOPRes struct {
 	Idx    int
-	Length int
+	Length []int
 }
 
 type HouseSystem interface {
 	InitMatchCache() (map[int32]Reside, [config.HouseLevel + 1][]Reside)
-	BatchInsertHouse(records []House) []BatchOPRes
-	InsertMatch(reside Reside) (MatchResponse, error)
+	BatchInsertHouses(records []House) BatchOPRes
+	BatchInsertMatches(resides utils.Resides) utils.Resides
 	CheckOutHouse(reside Reside) error
 	QueryReside(HouseID []int32) []Reside
 	QueryHouse(HouseID []int32) []House
@@ -150,7 +151,7 @@ func InitDB() (*DB, error) {
 	// }
 	// fmt.Printf("%+v\n", Houses)
 	// myDB := &DB{db}
-	// myDB.BatchInsertHouse(Houses)
+	// myDB.BatchInsertHouses(Houses)
 	// Familys := []Family{
 	// 	{Income: 1000},
 	// 	{Income: 800},

@@ -15,7 +15,7 @@ type propertyActor struct {
 
 // Exam the house, we need define a metric to do with
 func examHouse(h storage.House) bool {
-	return h.Age <= 5
+	return h.Age <= 5 || h.Deleted == true
 }
 
 func (p *propertyActor) Receive(ctx actor.Context) {
@@ -29,7 +29,7 @@ func (p *propertyActor) Receive(ctx actor.Context) {
 			}
 		}
 		if len(houses) != 0 {
-			ctx.Respond(&propertyMessages.ExaminationRejects{HouseID: houses})
+			ctx.Request(p.managerPID, &propertyMessages.UnqualifiedHouseIDs{HouseID: houses})
 		}
 	}
 }

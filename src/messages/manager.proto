@@ -8,44 +8,31 @@ import "Reactive-Welfare-Housing-System/src/messages/distributor.proto";
 import "Reactive-Welfare-Housing-System/src/messages/shared.proto";
 import "Reactive-Welfare-Housing-System/src/messages/property.proto";
 
-message HouseMatchApprove {
-    distributor.HouseMatch Match = 1;
-}
-
 message HouseCheckOut {
     distributor.HouseCheckOut CheckOut = 1;
 }
 
-message HouseMatchReject {
-    distributor.HouseMatch Match = 1;
-    int32 Reason = 2;
-}
-
 message NewHouses {
-    shared.NewHouses Houses = 1;
+    repeated shared.NewHouse Houses = 1;
     int32 CommitIndex = 2;
 }
 
-message HouseMatchACK {
-    
+message HouseMatchRequestsACK {
+    int32 CommitIndex = 1;
 }
 
 message HouseCheckOutACK {
     int32 HouseID = 1;
 }
 
-message ExaminationReject {
+message UnqualifiedReside {
     int32 HouseID = 1;
-    int32 Age = 2;
-    int32 Area = 3;
-    int32 Level = 4;
-    int32 FamilyID = 5;
-}
-
-message UnqualifiedHouses {
-    repeated ExaminationReject Houses = 1;
+    int32 Level = 2;
+    int32 FamilyID = 3;
 }
 
 message UnqualifiedResides {
-    repeated ExaminationReject Resides = 1;
+    repeated UnqualifiedReside Resides = 1;
+    int32 CommitIndex = 2;
 }
+
