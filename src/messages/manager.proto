@@ -22,7 +22,7 @@ message HouseMatchRequestsACK {
 }
 
 message HouseCheckOutACK {
-    int32 HouseID = 1;
+    int32 CommitIndex = 1;
 }
 
 message UnqualifiedReside {

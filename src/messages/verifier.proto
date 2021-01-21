@@ -33,6 +33,10 @@ message HouseCheckOut {
     int32 Level = 3;
 }
 
+message HouseCheckOuts {
+    repeated HouseCheckOut Checkouts = 1;
+    int32 CommitIndex = 2;
+}
+
 message HouseCheckOutACK {
-    
 }

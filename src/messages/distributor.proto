@@ -38,10 +38,16 @@ message HouseCheckOutResponse {
 message HouseCheckOut {
   int32 FamilyID = 1;
   int32 HouseID = 2;
+  int32 Level = 3;
+}
+
+message HouseCheckOuts {
+  repeated HouseCheckOut Checkouts = 1;
+  int32 CommitIndex = 2;
 }
 
 message HouseCheckOutACK {
-
+  int32 CommitIndex = 1;
 }
 
 message UnqualifiedHousesACK {
