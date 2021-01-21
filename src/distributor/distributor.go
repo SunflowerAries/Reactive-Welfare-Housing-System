@@ -28,6 +28,12 @@ type houseMatchRequestLog struct {
 	mu          sync.RWMutex
 }
 
+type HouseCheckOutLog struct {
+	log 		[]*distributorMessages.HouseCheckOut
+	commitIndex	int
+	mu 			sync.RWMutex
+}
+
 type distributorActor struct {
 	db                     storage.HouseSystem
 	occupied               map[int32]storage.Reside
@@ -37,6 +43,7 @@ type distributorActor struct {
 	newhouseCommitIndex    int
 	applicationResponseLog applicationResponseLog
 	houseMatchRequestLog   houseMatchRequestLog
+	HouseCheckOutLog	   HouseCheckOutLog
 }
 
 func (d *distributorActor) Receive(ctx actor.Context) {
@@ -62,6 +69,17 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 					d.applicationResponseLog.mu.RUnlock()
 					if len(requests0) > 0 {
 						ctx.Request(d.verifierPID, &distributorMessages.HouseApplicationResponses{Responses: requests0, CommitIndex: int32(responseIndex)})
+					}
+
+					d.HouseCheckOutLog.mu.RLock()
+					checkoutIndex := d.HouseCheckOutLog.commitIndex
+					requests1 := d.HouseCheckOutLog.log[checkoutIndex:]
+					d.HouseCheckOutLog.mu.RUnlock()
+					if len(requests1) > 0 {
+						ctx.Request(d.managerPID, &distributorMessages.HouseCheckOuts{
+							Checkouts:   requests1,
+							CommitIndex: int32(checkoutIndex),
+						})
 					}
 				}
 			}
@@ -132,6 +150,38 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 				}
 			})
 		}
+	case *verifierMessages.HouseCheckOuts:
+		for _, checkout := range msg.Checkouts {
+			if reside, ok := d.occupied[checkout.FamilyID]; ok {
+				d.HouseCheckOutLog.log = append(d.HouseCheckOutLog.log, &distributorMessages.HouseCheckOut{
+					FamilyID: checkout.FamilyID,
+					HouseID:  d.occupied[checkout.FamilyID].HouseID,
+					Level: d.occupied[checkout.FamilyID].Level,
+				})
+				delete(d.occupied, checkout.FamilyID)
+				d.vacant[reside.Level] = append(d.vacant[reside.Level], reside)
+			} else {
+				fmt.Printf("Family[%d] do not have any house.\n")
+			}
+		}
+		ctx.Respond(&distributorMessages.HouseCheckOutACK{
+			CommitIndex: msg.CommitIndex+int32(len(msg.Checkouts))
+		})
+		pstart := len(d.HouseCheckOutLog.log)
+
+		d.HouseCheckOutLog.mu.Lock()
+		commitIndex := d.HouseCheckOutLog.commitIndex
+		d.HouseCheckOutLog.mu.Unlock()
+		ctx.Request(d.managerPID, &distributorMessages.HouseCheckOuts{
+			Checkouts:   d.HouseCheckOutLog.log[commitIndex:pstart],
+			CommitIndex: int32(commitIndex),
+		})
+
+	case *managerMessages.HouseCheckOutACK:
+		d.HouseCheckOutLog.mu.Lock()
+		d.HouseCheckOutLog.commitIndex = utils.Max(d.HouseCheckOutLog.commitIndex, msg.CommitIndex)
+		d.HouseCheckOutLog.mu.Unlock()
+
 	case *verifierMessages.HouseApplicationRequest:
 		var status int32
 		var match distributorMessages.HouseMatch

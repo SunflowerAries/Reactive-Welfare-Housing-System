@@ -33,6 +33,12 @@ type resideLog struct {
 	Mu          sync.RWMutex
 }
 
+type HouseCheckOutLog struct {
+	log 		[]*managerMessages.HouseCheckOut
+	CommitIndex	int
+	Mu			sync.RWMutex
+}
+
 type managerActor struct {
 	db                      storage.HouseSystem
 	distributorPID          *actor.PID
@@ -41,6 +47,7 @@ type managerActor struct {
 	newHousesLog            houseLog
 	unqualifiedResides2DLog resideLog // to distributor
 	unqualifiedResides2VLog resideLog // to verifier
+	HouseCheckOutLog		HouseCheckOutLog
 	houseMatchIndex         utils.Index
 }
 
@@ -142,6 +149,27 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				ctx.Request(m.distributorPID, &managerMessages.HouseMatchRequestsACK{CommitIndex: int32(idx)})
 			}(requests)
 		}
+	case *distributorMessages.HouseCheckOuts:
+		m.HouseCheckOutLog.Mu.Lock()
+		pstart := len(m.HouseCheckOutLog.log)
+		var checkouts []storage.Reside
+		for _, checkout := range msg.Checkouts {
+			checkouts = append(checkouts, storage.Reside{
+				HouseID:  checkout.HouseID,
+				FamilyID: checkout.FamilyID,
+				Level:    checkout.Level,
+			})
+		}
+		m.HouseCheckOutLog.Mu.Unlock()
+		go func(pstart int, checkouts []storage.Reside, commitindex int32){
+			err := m.db.BatchCheckOutHouses(checkouts)
+			if err != nil {
+				log.Print("Manager: Checkout house failed ", err)
+			}
+			ctx.Request(m.distributorPID, &managerMessages.HouseCheckOutACK{CommitIndex: commitindex+int32(len(checkouts))})
+
+		}(pstart, checkouts, msg.CommitIndex)
+
 	case *distributorMessages.HouseCheckOut:
 		if msg.Retry != true {
 			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
