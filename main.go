@@ -6,6 +6,8 @@ import (
 	"Reactive-Welfare-Housing-System/src/verifier"
 	"encoding/json"
 	"fmt"
+	"github.com/AsynkronIT/protoactor-go/persistence"
+	"strconv"
 
 	"Reactive-Welfare-Housing-System/src/messages/sharedMessages"
 	"Reactive-Welfare-Housing-System/src/storage"
@@ -15,6 +17,43 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/mailbox"
 )
+
+type Provider struct {
+	providerState persistence.ProviderState
+}
+
+func NewProvider(snapshotInterval int) *Provider {
+	return &Provider{
+		providerState: persistence.NewInMemoryProvider(snapshotInterval),
+	}
+}
+
+func (p *Provider) InitState(actorName string, eventNum, eventIndexAfterSnapshot int) {
+	for i := 0; i < eventNum; i++ {
+		p.providerState.PersistEvent(
+			actorName,
+			i,
+			&Message{protoMsg: protoMsg{state: "state" + strconv.Itoa(i)}},
+		)
+	}
+	p.providerState.PersistSnapshot(
+		actorName,
+		eventIndexAfterSnapshot,
+		&Snapshot{protoMsg: protoMsg{state: "state" + strconv.Itoa(eventIndexAfterSnapshot-1)}},
+	)
+}
+
+func (p *Provider) GetState() persistence.ProviderState {
+	return p.providerState
+}
+
+func (p *protoMsg) Reset()         {}
+func (p *protoMsg) String() string { return p.state }
+func (p *protoMsg) ProtoMessage()  {}
+
+type protoMsg struct{ state string }
+type Message struct{ protoMsg }
+type Snapshot struct{ protoMsg }
 
 type Env struct {
 	db             storage.HouseSystem
@@ -32,9 +71,17 @@ func main() {
 	}
 
 	system = actor.NewActorSystem()
-	distributorPID := system.Root.Spawn(actor.PropsFromProducer(distributor.NewDistributorActor(db)).WithMailbox(mailbox.Unbounded()))
-	managerPID := system.Root.Spawn(actor.PropsFromProducer(manager.NewManagerActor(db)).WithMailbox(mailbox.Unbounded()))
-	veriferPID := system.Root.Spawn(actor.PropsFromProducer(verifier.NewVerifierActor()).WithMailbox(mailbox.Unbounded()))
+	distributorProvider := NewProvider(3)
+	distributorProvider.InitState("distributor", 4, 3)
+	distributorPID := system.Root.Spawn(actor.PropsFromProducer(distributor.NewDistributorActor(db)).WithMailbox(mailbox.Unbounded()).WithReceiverMiddleware(persistence.Using(distributorProvider)))
+
+	managerProvider := NewProvider(3)
+	managerProvider.InitState("manager", 4, 3)
+	managerPID := system.Root.Spawn(actor.PropsFromProducer(manager.NewManagerActor(db)).WithMailbox(mailbox.Unbounded()).WithReceiverMiddleware(persistence.Using(managerProvider)))
+
+	verifierProvider := NewProvider(3)
+	verifierProvider.InitState("verifier", 4, 3)
+	veriferPID := system.Root.Spawn(actor.PropsFromProducer(verifier.NewVerifierActor()).WithMailbox(mailbox.Unbounded()).WithReceiverMiddleware(persistence.Using(verifierProvider)))
 	fmt.Println(distributorPID, managerPID, veriferPID)
 	system.Root.Send(distributorPID, &sharedMessages.ManagerConnect{
 		Sender: managerPID,
@@ -45,9 +92,6 @@ func main() {
 	system.Root.Send(managerPID, &sharedMessages.VerifierConnect{
 		Sender: veriferPID,
 	})
-	// system.Root.Send(managerPID, &sharedMessages.Connect{
-	// 	Sender: distributorPID,
-	// })
 	env := &Env{db, distributorPID, managerPID, veriferPID}
 	http.HandleFunc("/users/checkout", env.userscheckoutIndex)
 	http.HandleFunc("/users", env.usersIndex)

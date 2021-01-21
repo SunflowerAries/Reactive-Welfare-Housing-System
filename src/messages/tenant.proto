@@ -21,11 +21,3 @@ message HouseReplacementRequest {
 
 message HouseReplacementResponse {
 }
-
-message HouseReturnRequest {
-    int32 UserId = 1; // could be a ID Card Number
-    string UserName = 2;
-}
-
-message HouseReturnResponse {
-}

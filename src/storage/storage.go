@@ -1,12 +1,12 @@
 package storage
 
 import (
-	"Reactive-Welfare-Housing-System/src/utils"
 	"database/sql"
 	"fmt"
 	"strings"
 
 	"Reactive-Welfare-Housing-System/src/config"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/thoas/go-funk"
 )
@@ -40,6 +40,14 @@ type Reside struct {
 	Level    int32
 }
 
+func RemoveReside(s []Reside, i int) ([]Reside, Reside) {
+	val := s[i]
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1], val
+}
+
+type Resides []Reside
+
 type NullableReside struct {
 	HouseID  sql.NullInt32
 	Level    int32
@@ -72,17 +80,28 @@ type BatchOPRes struct {
 	Length []int
 }
 
+func (r Resides) Len() int {
+	return len(r)
+}
+
+func (r Resides) Less(i, j int) bool {
+	return r[i].HouseID < r[j].HouseID
+}
+
+func (r Resides) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
 type HouseSystem interface {
 	InitMatchCache() (map[int32]Reside, [config.HouseLevel + 1][]Reside)
 	BatchInsertHouses(records []House) BatchOPRes
-	BatchInsertMatches(resides utils.Resides) utils.Resides
+	BatchInsertMatches(resides Resides) Resides
 	CheckOutHouse(reside Reside) error
 	QueryReside(HouseID []int32) []Reside
 	QueryHouse(HouseID []int32) []House
 	DeleteHouseAndReside(HouseID []int32) error
 	DeleteHouse(HouseID []int32) error
 	DeleteReside(reside Reside)
-	ClearHouse() []Reside
 	BatchCheckOutHouses(checkouts []Reside)
 }
 

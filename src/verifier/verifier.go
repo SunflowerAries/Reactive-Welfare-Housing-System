@@ -19,17 +19,25 @@ import (
 )
 
 type checkoutLog struct {
-	log 			[]*verifierMessages.HouseCheckOut
-	commitIndex		int
-	Mu 				sync.RWMutex
+	log         []*verifierMessages.HouseCheckOut
+	commitIndex int
+	Mu          sync.RWMutex
 }
+
+type requestLog struct {
+	log         []*verifierMessages.HouseApplicationRequest
+	commitIndex int
+	Mu          sync.RWMutex
+}
+
 // Actor The  Verifier Actor
 type verifierActor struct {
 	shared.BaseActor
-	mamagerPID     	*actor.PID
-	distributorPID 	*actor.PID
-	governmentPID  	*actor.PID
-	newcheckoutLog	checkoutLog
+	mamagerPID     *actor.PID
+	distributorPID *actor.PID
+	governmentPID  *actor.PID
+	newcheckoutLog checkoutLog
+	newrequestLog  requestLog
 }
 
 // Receive Receive function for Verifier Actor
@@ -37,9 +45,10 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
 		go func() {
-			select {
-			//300ms
-				case <- time.Tick(config.TIME_OUT * time.Millisecond):
+			for {
+				select {
+				//300ms
+				case <-time.Tick(config.TIME_OUT * time.Millisecond):
 					go func() {
 						v.newcheckoutLog.Mu.RLock()
 						checkoutCommitIndex := v.newcheckoutLog.commitIndex
@@ -47,59 +56,49 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 						v.newcheckoutLog.Mu.RUnlock()
 						if len(checkouts) > 0 {
 							ctx.Request(v.distributorPID, &verifierMessages.HouseCheckOuts{
-								Checkouts: checkouts,
-								CommitIndex: int32(checkoutCommitIndex)
+								Checkouts:   checkouts,
+								CommitIndex: int32(checkoutCommitIndex),
 							})
 						}
 					}()
+
+					go func() {
+						v.newrequestLog.Mu.RLock()
+						requestCommitIndex := v.newrequestLog.commitIndex
+						requests := v.newrequestLog.log[requestCommitIndex:]
+						v.newrequestLog.Mu.RUnlock()
+						if len(requests) > 0 {
+							ctx.Request(v.distributorPID, &verifierMessages.HouseApplicationRequests{
+								Requests:    requests,
+								CommitIndex: int32(requestCommitIndex),
+							})
+						}
+					}()
+				}
 			}
 		}()
-	// case *actor.Started:
-	// 	fmt.Println("Verifier Starting, initialize actor here, PID:", ctx.Self())
-	// t.distributor = actor.NewPID("127.0.0.1:8081", "Distributor")
-	// t.government = actor.NewPID("127.0.0.1:8082", "Government")
-	// shared.Use(verifierActor)
-	// case *actor.Stopped:
-	// 	fmt.Println("Verifier Stopped, actor and its children are stopped")
-	// case *tenantMessage.HouseApplicationRequest:
-	// 	fmt.Println("Verifier Received a application from ", msg.UserName)
-	// 	ctx.Send(ctx.Sender(), &tenantMessage.HouseApplicationResponse{})
 	case *sharedMessages.DistributorConnect:
 		v.distributorPID = msg.Sender
 		ctx.Send(v.distributorPID, &sharedMessages.VerifierConnect{Sender: ctx.Self()})
-	case *sharedMessages.NewRequest:
-		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseApplicationRequest{FamilyID: msg.FamilyID, Level: msg.Level, Retry: false}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-			}
-
-			switch res.(type) {
-			case *distributorMessages.HouseApplicationACK:
-				log.Print("Verifier: Received HouseApplication ACK")
-			case *distributorMessages.HouseApplicationReject:
-				log.Print("Verifier: Received HouseApplication Reject, ", res.(*distributorMessages.HouseApplicationReject).Reason)
-			default:
-				log.Print("Verifier: Request Received unexpected response, ", res)
-			}
-		})
 	case *sharedMessages.NewRequests:
+		v.newrequestLog.Mu.Lock()
+		pstart := len(v.newrequestLog.log)
+		//v.newrequestLog.log = append(v.newrequestLog.log, msg.CheckOuts...)
 		for _, request := range msg.Requests {
-			ctx.Self().Tell(request)
+			v.newrequestLog.log = append(v.newrequestLog.log, &verifierMessages.HouseApplicationRequest{
+				FamilyID: request.FamilyID,
+				Level:    request.Level,
+			})
 		}
-	case *sharedMessages.NewCheckOut:
-		future := ctx.RequestFuture(v.distributorPID, &verifierMessages.HouseCheckOut{FamilyID: msg.FamilyID, Level: msg.Level, Retry: false}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				ctx.Self().Tell(msg)
-			}
+		v.newrequestLog.Mu.Unlock()
 
-			switch res.(type) {
-			case *distributorMessages.HouseCheckOutACK:
-				log.Print("Verifier: Received HouseCheckOut ACK")
-			default:
-				log.Print("Verifier: CheckOut Received unexpected response, ", res)
-			}
+		pstart0 := pstart
+		v.newrequestLog.Mu.RLock()
+		commitIndex := v.newrequestLog.commitIndex
+		v.newrequestLog.Mu.RUnlock()
+		ctx.Request(v.distributorPID, &verifierMessages.HouseCheckOuts{
+			Checkouts:   v.newrequestLog.log[commitIndex : pstart0+len(checkouts)],
+			CommitIndex: int32(commitIndex),
 		})
 	case *sharedMessages.NewCheckOuts:
 		v.newcheckoutLog.Mu.Lock()
@@ -107,9 +106,9 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		//v.newcheckoutLog.log = append(v.newcheckoutLog.log, msg.CheckOuts...)
 		var checkouts []verifierMessages.HouseCheckOut
 		for _, checkout := range msg.CheckOuts {
-			v.newcheckoutLog.log = append(v.newcheckoutLog.log, verifierMessages.HouseCheckOut{
-				FamilyID: 	checkout.FamilyID,
-				Level: 	  	checkout.Level,
+			v.newcheckoutLog.log = append(v.newcheckoutLog.log, &verifierMessages.HouseCheckOut{
+				FamilyID: checkout.FamilyID,
+				Level:    checkout.Level,
 			})
 			checkouts = append(checkouts, verifierMessages.HouseCheckOut{
 				UserInfo: nil,
@@ -124,7 +123,7 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		commitIndex := v.newcheckoutLog.commitIndex
 		v.newcheckoutLog.Mu.RUnlock()
 		ctx.Request(v.distributorPID, &verifierMessages.HouseCheckOuts{
-			Checkouts:   v.newcheckoutLog.log[commitIndex : pstart0 + len(checkouts)],
+			Checkouts:   v.newcheckoutLog.log[commitIndex : pstart0+len(checkouts)],
 			CommitIndex: int32(commitIndex),
 		})
 
@@ -133,12 +132,12 @@ func (v *verifierActor) Receive(ctx actor.Context) {
 		v.newcheckoutLog.commitIndex = utils.Max(v.newcheckoutLog.commitIndex, int(msg.CommitIndex))
 		v.newcheckoutLog.Mu.Unlock()
 
-	case *managerMessages.HouseMatchApprove:
-		log.Print("Verifier: Received HouseMatchApprove, ", msg.Match)
-		ctx.Respond(&verifierMessages.HouseMatchApproveACK{})
-	case *managerMessages.HouseMatchReject:
-		log.Print("Verifier: Received HouseMatchReject, ", msg.Match, msg.Reason)
-		ctx.Respond(&verifierMessages.HouseMatchRejectACK{})
+	//case *managerMessages.HouseMatchApprove:
+	//	log.Print("Verifier: Received HouseMatchApprove, ", msg.Match)
+	//	ctx.Respond(&verifierMessages.HouseMatchApproveACK{})
+	//case *managerMessages.HouseMatchReject:
+	//	log.Print("Verifier: Received HouseMatchReject, ", msg.Match, msg.Reason)
+	//	ctx.Respond(&verifierMessages.HouseMatchRejectACK{})
 	case *managerMessages.HouseCheckOut:
 		log.Print("Verifier: Received HouseCheckOut, ", msg.CheckOut)
 		ctx.Respond(&verifierMessages.HouseCheckOutACK{})
@@ -158,9 +157,9 @@ func NewVerifierActor() actor.Producer {
 }
 
 func init() {
-	// remote.Start("127.0.0.1:8080")
-	// remote.Register("Verifier", actor.PropsFromProducer(newVerifierActor))
-	// var rootContext = actor.EmptyRootContext
-	// props := actor.PropsFromProducer(func() actor.Actor { return &Actor{} })
-	// rootContext.SpawnNamed(props, "Verifier")
+	//remote.Start("127.0.0.1:8080")
+	//remote.Register("Verifier", actor.PropsFromProducer(newVerifierActor))
+	//var rootContext = actor.EmptyRootContext
+	//props := actor.PropsFromProducer(func() actor.Actor { return &Actor{} })
+	//rootContext.SpawnNamed(props, "Verifier")
 }

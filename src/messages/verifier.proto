@@ -11,17 +11,15 @@ message HouseApplicationRequest {
     int32 Level = 2;
 }
 
+message HouseApplicationRequests {
+    repeated HouseApplicationRequest Requests = 1;
+    int32 CommitIndex = 2;
+}
+
 message HouseApplicationResponse {
 
 }
 
-message HouseMatchApproveACK {
-
-}
-
-message HouseMatchRejectACK {
-    
-}
 
 message UnqualifiedResidesACK {
     int32 CommitIndex = 1;
@@ -36,7 +34,4 @@ message HouseCheckOut {
 message HouseCheckOuts {
     repeated HouseCheckOut Checkouts = 1;
     int32 CommitIndex = 2;
-}
-
-message HouseCheckOutACK {
 }

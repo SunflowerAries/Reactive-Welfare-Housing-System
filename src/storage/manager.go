@@ -1,27 +1,12 @@
 package storage
 
 import (
-	"Reactive-Welfare-Housing-System/src/utils"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/thoas/go-funk"
 )
-
-func (db *DB) ClearHouse() []Reside {
-	rows, err := db.Query(`SELECT house_id, family_id FROM reside WHERE checkout = true`)
-	db.Exec(`DELETE FROM reside WHERE checkout = true`)
-	var checkouted []Reside
-	for rows.Next() {
-		var reside Reside
-		if err := rows.Scan(&reside.HouseID, &reside.FamilyID); err != nil {
-			log.Print(err)
-		}
-		checkouted = append(checkouted, reside)
-	}
-	return checkouted
-}
 
 func (db *DB) DeleteHouse(HouseID []int32) error {
 	args := make([]interface{}, len(HouseID))
@@ -77,10 +62,10 @@ func (db *DB) QueryReside(HouseID []int32) []Reside {
 	return examined
 }
 
-func (db *DB) BatchInsertMatches(resides utils.Resides) utils.Resides {
+func (db *DB) BatchInsertMatches(resides Resides) Resides {
 	args := make([]interface{}, len(resides))
-	deletedHouses := utils.Resides{}
-	restHouses := utils.Resides{}
+	deletedHouses := Resides{}
+	restHouses := Resides{}
 	var id int32
 	for i, reside := range resides {
 		args[i] = reside.HouseID
@@ -133,7 +118,7 @@ func (db *DB) BatchInsertMatches(resides utils.Resides) utils.Resides {
 	return deletedHouses
 }
 
-func (db *DB) batchInsertMatches(resides utils.Resides) {
+func (db *DB) batchInsertMatches(resides Resides) {
 	size := MAXARGS / ResideArgLens
 	tx, _ := db.Begin()
 	chunkList := funk.Chunk(resides, size)

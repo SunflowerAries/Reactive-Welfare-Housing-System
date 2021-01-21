@@ -11,12 +11,13 @@ import (
 	"Reactive-Welfare-Housing-System/src/storage"
 	"Reactive-Welfare-Housing-System/src/utils"
 	"fmt"
-	"github.com/AsynkronIT/protoactor-go/mailbox"
 	"log"
 	"reflect"
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/AsynkronIT/protoactor-go/mailbox"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
@@ -114,7 +115,7 @@ func (m *managerActor) Receive(ctx actor.Context) {
 		for _, request := range msg.Requests {
 			requests = append(requests, storage.Reside{HouseID: request.Match.HouseID, FamilyID: request.FamilyID, Level: request.Match.Level})
 		}
-		go func(requests utils.Resides, pstart int) {
+		go func(requests storage.Resides, pstart int) {
 			m.houseMatchIndex.Mu.Lock()
 			matchIndex := m.houseMatchIndex.Idx
 			m.houseMatchIndex.Mu.Unlock()

@@ -111,7 +111,7 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 			} else {
 				for index, vacant := range d.vacant[deleted.Level] {
 					if vacant.HouseID == deleted.HouseID {
-						d.vacant[deleted.Level], _ = utils.RemoveReside(d.vacant[deleted.Level], index)
+						d.vacant[deleted.Level], _ = storage.RemoveReside(d.vacant[deleted.Level], index)
 						break
 					}
 				}
@@ -144,7 +144,7 @@ func (d *distributorActor) Receive(ctx actor.Context) {
 		var match distributorMessages.HouseMatch
 		if house, ok := d.occupied[msg.FamilyID]; !ok {
 			if len(d.vacant[msg.Level]) > 0 {
-				d.vacant[msg.Level], house = utils.RemoveReside(d.vacant[msg.Level], 0)
+				d.vacant[msg.Level], house = storage.RemoveReside(d.vacant[msg.Level], 0)
 				house.FamilyID = msg.FamilyID
 				d.occupied[msg.FamilyID] = house
 				status = config.SUCCESS

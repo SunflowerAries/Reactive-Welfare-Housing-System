@@ -4,7 +4,7 @@ import (
 	// "runtime"
 	"fmt"
 	// console "github.com/AsynkronIT/goconsole"
-	tenantMessage "Reactive-Welfare-Housing-System/src/messages/tenant"
+	"Reactive-Welfare-Housing-System/src/messages/tenantMessages"
 	"Reactive-Welfare-Housing-System/src/shared"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
