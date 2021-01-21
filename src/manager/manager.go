@@ -33,12 +33,6 @@ type resideLog struct {
 	Mu          sync.RWMutex
 }
 
-type HouseCheckOutLog struct {
-	log 		[]*managerMessages.HouseCheckOut
-	CommitIndex	int
-	Mu			sync.RWMutex
-}
-
 type managerActor struct {
 	db                      storage.HouseSystem
 	distributorPID          *actor.PID
@@ -47,7 +41,7 @@ type managerActor struct {
 	newHousesLog            houseLog
 	unqualifiedResides2DLog resideLog // to distributor
 	unqualifiedResides2VLog resideLog // to verifier
-	HouseCheckOutLog		HouseCheckOutLog
+	houseCheckOutIndex      utils.Index
 	houseMatchIndex         utils.Index
 }
 
@@ -82,14 +76,6 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				}
 			}
 		}()
-		//checkouts := m.db.ClearHouse()
-		//var resides []*managerMessages.UnqualifiedReside
-		//for _, checkout := range checkouts {
-		//	resides = append(resides, &managerMessages.UnqualifiedReside{houseID: checkout.houseID, FamilyID: checkout.FamilyID})
-		//}
-		//if len(resides) != 0 {
-		//	ctx.Self().Tell(&managerMessages.UnqualifiedResides{Resides: resides})
-		//}
 	case *sharedMessages.NewHouses:
 		m.newHousesLog.Mu.Lock()
 		pstart := len(m.newHousesLog.log)
@@ -124,34 +110,34 @@ func (m *managerActor) Receive(ctx actor.Context) {
 	case *sharedMessages.VerifierConnect:
 		m.verifierPID = msg.Sender
 	case *distributorMessages.HouseMatchRequests:
-		pstart := int(msg.CommitIndex)
 		var requests []storage.Reside
-		m.houseMatchIndex.Mu.Lock()
-		matchIndex := m.houseMatchIndex.Idx
-		m.houseMatchIndex.Mu.Unlock()
-		if matchIndex > pstart && matchIndex < pstart+len(msg.Requests) {
-			for _, request := range msg.Requests[matchIndex-pstart:] {
-				requests = append(requests, storage.Reside{HouseID: request.Match.HouseID, FamilyID: request.FamilyID, Level: request.Match.Level})
+		for _, request := range msg.Requests {
+			requests = append(requests, storage.Reside{HouseID: request.Match.HouseID, FamilyID: request.FamilyID, Level: request.Match.Level})
+		}
+		go func(requests utils.Resides, pstart int) {
+			m.houseMatchIndex.Mu.Lock()
+			matchIndex := m.houseMatchIndex.Idx
+			m.houseMatchIndex.Mu.Unlock()
+			var longIdx int
+			if matchIndex < pstart+len(msg.Requests) {
+				longIdx = pstart + len(msg.Requests)
+				requests = requests[matchIndex-pstart:]
 			}
-			go func(requests utils.Resides) {
+			if len(requests) > 0 {
 				sort.Sort(requests)
 				unqualifieds := m.db.BatchInsertMatches(requests)
 				m.houseMatchIndex.Mu.Lock()
-				m.houseMatchIndex.Idx += len(requests)
-				idx := m.houseMatchIndex.Idx
+				m.houseMatchIndex.Idx = utils.Max(m.houseMatchIndex.Idx, longIdx)
 				m.houseMatchIndex.Mu.Unlock()
-
 				m.unqualifiedResides2VLog.Mu.Lock()
 				for _, unqualified := range unqualifieds {
 					m.unqualifiedResides2VLog.log = append(m.unqualifiedResides2VLog.log, &managerMessages.UnqualifiedReside{HouseID: unqualified.HouseID, FamilyID: unqualified.FamilyID, Level: unqualified.Level})
 				}
 				m.unqualifiedResides2VLog.Mu.Unlock()
-				ctx.Request(m.distributorPID, &managerMessages.HouseMatchRequestsACK{CommitIndex: int32(idx)})
-			}(requests)
-		}
+				ctx.Request(m.distributorPID, &managerMessages.HouseMatchRequestsACK{CommitIndex: int32(longIdx)})
+			}
+		}(requests, int(msg.CommitIndex))
 	case *distributorMessages.HouseCheckOuts:
-		m.HouseCheckOutLog.Mu.Lock()
-		pstart := len(m.HouseCheckOutLog.log)
 		var checkouts []storage.Reside
 		for _, checkout := range msg.Checkouts {
 			checkouts = append(checkouts, storage.Reside{
@@ -160,41 +146,23 @@ func (m *managerActor) Receive(ctx actor.Context) {
 				Level:    checkout.Level,
 			})
 		}
-		m.HouseCheckOutLog.Mu.Unlock()
-		go func(pstart int, checkouts []storage.Reside, commitindex int32){
-			err := m.db.BatchCheckOutHouses(checkouts)
-			if err != nil {
-				log.Print("Manager: Checkout house failed ", err)
+		go func(checkouts []storage.Reside, commitIndex int) {
+			m.houseCheckOutIndex.Mu.Lock()
+			idx := m.houseCheckOutIndex.Idx
+			m.houseCheckOutIndex.Mu.Unlock()
+			var longIdx int
+			if commitIndex+len(checkouts) > idx {
+				checkouts = checkouts[idx-commitIndex:]
+				longIdx = commitIndex + len(checkouts)
 			}
-			ctx.Request(m.distributorPID, &managerMessages.HouseCheckOutACK{CommitIndex: commitindex+int32(len(checkouts))})
-
-		}(pstart, checkouts, msg.CommitIndex)
-
-	case *distributorMessages.HouseCheckOut:
-		if msg.Retry != true {
-			err := m.db.CheckOutHouse(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
-			if err != nil {
-				log.Print("Manager: Checkout house failed ", err)
-				return
+			if len(checkouts) > 0 {
+				m.db.BatchCheckOutHouses(checkouts)
+				m.houseCheckOutIndex.Mu.Lock()
+				m.houseCheckOutIndex.Idx = utils.Max(m.houseCheckOutIndex.Idx, longIdx)
+				m.houseCheckOutIndex.Mu.Unlock()
+				ctx.Request(m.distributorPID, &managerMessages.HouseCheckOutACK{CommitIndex: int32(longIdx)})
 			}
-			ctx.Respond(&managerMessages.HouseCheckOutACK{HouseID: msg.HouseID})
-		}
-		future := ctx.RequestFuture(m.verifierPID, &managerMessages.HouseCheckOut{CheckOut: msg}, 2000*time.Millisecond)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			if err != nil {
-				msg.Retry = true
-				ctx.Self().Tell(msg)
-				return
-			}
-
-			switch res.(type) {
-			case *verifierMessages.HouseCheckOutACK:
-				m.db.DeleteReside(storage.Reside{FamilyID: msg.FamilyID, HouseID: msg.HouseID})
-				log.Print("Manager: Received HouseCheckOut ACK")
-			default:
-				log.Print("Manager: Received unexpected response, ", res)
-			}
-		})
+		}(checkouts, int(msg.CommitIndex))
 	case *propertyMessages.UnqualifiedHouseIDs:
 		go func(houseIDs []int32) {
 			rawUnqualifiedHouse := m.db.QueryReside(houseIDs)

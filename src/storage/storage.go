@@ -83,6 +83,7 @@ type HouseSystem interface {
 	DeleteHouse(HouseID []int32) error
 	DeleteReside(reside Reside)
 	ClearHouse() []Reside
+	BatchCheckOutHouses(checkouts []Reside)
 }
 
 type DB struct {

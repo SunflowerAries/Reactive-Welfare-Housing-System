@@ -166,6 +166,32 @@ func (db *DB) CheckOutHouse(reside Reside) error {
 	return err
 }
 
+func (db *DB) BatchCheckOutHouses(checkouts []Reside) {
+	size := MAXARGS
+	tx, _ := db.Begin()
+	chunkList := funk.Chunk(checkouts, size)
+	for _, chunk := range chunkList.([][]Reside) {
+		valueArgs := make([]interface{}, 0, len(chunk))
+		for _, record := range chunk {
+			valueArgs = append(valueArgs, record.HouseID)
+		}
+		stmt := fmt.Sprintf("UPDATE reside SET reside.checkout = true "+
+			"WHERE reside.house_id IN (?%s)", strings.Repeat(",?", len(valueArgs)-1))
+		_, err := tx.Exec(stmt, valueArgs...)
+		if err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				fmt.Println("BatchCheckOutHouses[manager]: unable to rollback, ", rollbackErr)
+			}
+			fmt.Println(err)
+			break
+		}
+	}
+	err := tx.Commit()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 // https://medium.com/better-programming/how-to-bulk-create-and-update-the-right-way-in-golang-part-i-e15a8e5585d1
 
 func (db *DB) BatchInsertHouses(records []House) BatchOPRes {
